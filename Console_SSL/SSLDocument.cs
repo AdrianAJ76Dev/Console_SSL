@@ -23,6 +23,7 @@ namespace Console_SSL
         private string template = string.Empty;
         private Document ssldoc;
         private MainDocumentPart sslmdp;
+        private WordprocessingDocument wrddoc;
 
         public SSLDocument() { }
         public SSLDocument(string templatefullname)
@@ -33,11 +34,15 @@ namespace Console_SSL
 
         public Document Doc { get; set; }
         public MainDocumentPart Mdp { get; set; }
+        public WordprocessingDocument WrdDoc { get; set; }
 
         private Document NewDocument()
         {
             WordprocessingDocument newdoc = WordprocessingDocument.CreateFromTemplate(template);
             sslmdp = newdoc.MainDocumentPart;
+            this.WrdDoc = newdoc;
+            this.Mdp = sslmdp;
+            this.Doc = sslmdp.Document;
             return newdoc.MainDocumentPart.Document;
         }
 
@@ -46,28 +51,42 @@ namespace Console_SSL
             List<CBAutoText> atxs = new List<CBAutoText>();
             foreach (string atxname in AutoTextName)
             {
-                atxs.Add(new CBAutoText(this));
+                atxs.Add(new CBAutoText(this, atxname));
             }
         }
 
         class CBAutoText
         {
             private SSLDocument ssldoc;
-            private GlossaryDocument gd;
             private GlossaryDocumentPart gdp;
+            private GlossaryDocument gd;
+            private DocParts gdocparts;
             private string name = string.Empty;
             private string containername = string.Empty;
             private string content = string.Empty;
 
-            public CBAutoText(SSLDocument parent)
+            public CBAutoText(SSLDocument parentdoc, string autotextname)
             {
-                ssldoc = parent;
+                ssldoc = parentdoc;
+                name = autotextname;
                 gdp = ssldoc.Mdp.GlossaryDocumentPart;
+                if (gdp != null)
+                {
+                    gd = gdp.GlossaryDocument;
+                    gdocparts = gd.DocParts;
+                }
             }
 
-            public string AutoTextContent
+            public IEnumerable<string> AutoTextContent
             {
-                get{return content;}
+                get
+                {
+                    IEnumerable<string> content = from gdocpart in gdocparts
+                              where gdocpart.Descendants<DocPartProperties>().First().DocPartName.Val == name
+                              select gdocpart.InnerXml;
+
+                    return content;
+                }
             }
         }
 

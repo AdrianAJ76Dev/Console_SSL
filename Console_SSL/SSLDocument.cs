@@ -23,7 +23,6 @@ namespace Console_SSL
         private string template = string.Empty;
         private Document ssldoc;
         private MainDocumentPart sslmdp;
-        private WordprocessingDocument wrddoc;
 
         public SSLDocument() { }
         public SSLDocument(string templatefullname)
@@ -52,6 +51,16 @@ namespace Console_SSL
             foreach (string atxname in AutoTextName)
             {
                 atxs.Add(new CBAutoText(this, atxname));
+            }
+
+            foreach (var atx in atxs)
+            {
+                Console.WriteLine("AutoTextContent count = {0}", atx.AutoTextContent.Count());
+                foreach (var item in atx.AutoTextContent)
+                {
+                    Console.WriteLine("Content ToString = {0}", item);
+                    Console.WriteLine();
+                }
             }
         }
 
@@ -83,7 +92,7 @@ namespace Console_SSL
                 {
                     IEnumerable<string> content = from gdocpart in gdocparts
                               where gdocpart.Descendants<DocPartProperties>().First().DocPartName.Val == name
-                              select gdocpart.InnerXml;
+                              select gdocpart.Descendants<DocPartBody>().FirstOrDefault().InnerXml;
 
                     return content;
                 }

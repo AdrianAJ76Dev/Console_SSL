@@ -55,12 +55,15 @@ namespace Console_SSL
 
             foreach (var atx in atxs)
             {
-                Console.WriteLine("AutoTextContent count = {0}", atx.AutoTextContent.Count());
-                foreach (var item in atx.AutoTextContent)
+                Console.WriteLine("AutoText Name: {0}\n ", atx.Name);
+                Console.WriteLine();
+                int i = 0;
+                foreach (object content in atx.AutoTextContent)
                 {
-                    Console.WriteLine("Content ToString = {0}", item);
-                    Console.WriteLine();
+                    i++;
+                    Console.WriteLine("Content {1}: {0}\n", content, i);
                 }
+
             }
         }
 
@@ -70,31 +73,37 @@ namespace Console_SSL
             private GlossaryDocumentPart gdp;
             private GlossaryDocument gd;
             private DocParts gdocparts;
-            private string name = string.Empty;
             private string containername = string.Empty;
             private string content = string.Empty;
 
             public CBAutoText(SSLDocument parentdoc, string autotextname)
             {
                 ssldoc = parentdoc;
-                name = autotextname;
+                this.Name = autotextname;
                 gdp = ssldoc.Mdp.GlossaryDocumentPart;
                 if (gdp != null)
                 {
                     gd = gdp.GlossaryDocument;
                     gdocparts = gd.DocParts;
                 }
+                // 10/25/2017 Here I should cancel creating an autotext object if there is not autotext
             }
 
-            public IEnumerable<string> AutoTextContent
+            public string Name { get; set; }
+
+            public Array AutoTextContent
             {
                 get
                 {
-                    IEnumerable<string> content = from gdocpart in gdocparts
-                              where gdocpart.Descendants<DocPartProperties>().First().DocPartName.Val == name
-                              select gdocpart.Descendants<DocPartBody>().FirstOrDefault().InnerXml;
-
-                    return content;
+                    var content = from gdocpart in gdocparts
+                                   where gdocpart.Descendants<DocPartProperties>().First().DocPartName.Val == this.Name
+                                   select new
+                                   {
+                                       aXml=gdocpart.Descendants<DocPartBody>().FirstOrDefault().InnerXml,
+                                       aText=gdocpart.Descendants<DocPartBody>().FirstOrDefault().InnerText
+                                   };
+;
+                    return content.ToArray();
                 }
             }
         }

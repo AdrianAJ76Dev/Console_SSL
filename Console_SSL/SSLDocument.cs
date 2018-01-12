@@ -21,8 +21,14 @@ namespace Console_SSL
          * Display new document
          */
         private string template = string.Empty;
-        private Document ssldoc;
+        private WordprocessingDocument wrddoc;
         private MainDocumentPart sslmdp;
+        private Document ssldoc;
+
+        private GlossaryDocumentPart gdp;
+        private GlossaryDocument gd;
+        private CBAutoText atx;
+        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
 
         public SSLDocument() { }
         public SSLDocument(string templatefullname)
@@ -31,81 +37,68 @@ namespace Console_SSL
             ssldoc = NewDocument();
         }
 
-        public Document Doc { get; set; }
-        public MainDocumentPart Mdp { get; set; }
-        public WordprocessingDocument WrdDoc { get; set; }
-
         private Document NewDocument()
         {
             WordprocessingDocument newdoc = WordprocessingDocument.CreateFromTemplate(template);
+            wrddoc = newdoc;
             sslmdp = newdoc.MainDocumentPart;
-            this.WrdDoc = newdoc;
-            this.Mdp = sslmdp;
-            this.Doc = sslmdp.Document;
             return newdoc.MainDocumentPart.Document;
         }
 
-        public void AddAutoText(string[] AutoTextName)
+        public void BuildDocument(string[] AutoTextName)
         {
-            List<CBAutoText> atxs = new List<CBAutoText>();
-            foreach (string atxname in AutoTextName)
-            {
-                atxs.Add(new CBAutoText(this, atxname));
-            }
 
-            foreach (var atx in atxs)
+            /* Here's where I look in the Glossary Document Part to determine it there IS AutoText
+             * If there isn't, then there's no use in creating the List of AutoText objects!
+             */
+            gdp = sslmdp.GlossaryDocumentPart;
+            if (gdp != null)
             {
-                Console.WriteLine("AutoText Name: {0}\n ", atx.Name);
-                Console.WriteLine();
-                int i = 0;
-                foreach (object content in atx.AutoTextContent)
+                gd = gdp.GlossaryDocument;
+                foreach (string atxname in AutoTextName)
                 {
-                    i++;
-                    Console.WriteLine("Content {1}: {0}\n", content, i);
+                    atx = new CBAutoText(atxname, gd.DocParts);
+                    InsertAutoText();
                 }
-
             }
+            wrddoc.SaveAs(DOC_PATH_NAME);
+        }
+
+        public void InsertAutoText()
+        {
+            // When doing the signature content contrld this dies!
+            var cctrl = (from sdtCtrl in sslmdp.Document.Descendants<SdtElement>()
+                         where (sdtCtrl.Descendants<Tag>().First().Val.ToString() == atx.Category)
+                         || (sdtCtrl.Descendants<SdtAlias>().First().Val.ToString() == atx.Name)
+                         select sdtCtrl).Single();
+
+            Console.WriteLine();
+            Console.WriteLine("atxt.AutoTextContent InnerText: {0}", atx.Content);
+            cctrl.InnerXml = atx.Content;
         }
 
         class CBAutoText
         {
-            private SSLDocument ssldoc;
-            private GlossaryDocumentPart gdp;
-            private GlossaryDocument gd;
-            private DocParts gdocparts;
-            private string containername = string.Empty;
+            private string name = string.Empty;
+            private string category = string.Empty;
             private string content = string.Empty;
 
-            public CBAutoText(SSLDocument parentdoc, string autotextname)
+            private string containername = string.Empty;
+
+            public CBAutoText(string autotextname, DocParts gdps)
             {
-                ssldoc = parentdoc;
-                this.Name = autotextname;
-                gdp = ssldoc.Mdp.GlossaryDocumentPart;
-                if (gdp != null)
-                {
-                    gd = gdp.GlossaryDocument;
-                    gdocparts = gd.DocParts;
-                }
-                // 10/25/2017 Here I should cancel creating an autotext object if there is not autotext
+                var atx = (from dp in gdps
+                            where dp.Descendants<DocPartProperties>().First().DocPartName.Val == autotextname
+                           select dp).Single();
+
+                name = autotextname;
+                content = atx.First().InnerText;
+                category = atx.Descendants<DocPartProperties>().First().Category.Name.Val;
             }
 
-            public string Name { get; set; }
-
-            public Array AutoTextContent
-            {
-                get
-                {
-                    var content = from gdocpart in gdocparts
-                                   where gdocpart.Descendants<DocPartProperties>().First().DocPartName.Val == this.Name
-                                   select new
-                                   {
-                                       aXml=gdocpart.Descendants<DocPartBody>().FirstOrDefault().InnerXml,
-                                       aText=gdocpart.Descendants<DocPartBody>().FirstOrDefault().InnerText
-                                   };
-;
-                    return content.ToArray();
-                }
-            }
+            public string Name { get { return name; } }
+            public string Category { get { return category; } }
+            public string Content { get { return content; } }
         }
 
         class CBData { }

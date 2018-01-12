@@ -19,7 +19,7 @@ namespace Console_SSL
             const string TEMPLATE_PATH_NAME = @"D:\Dev Projects\SSL\Documents\Sole Source Letter v4.dotx";
             /* Create new document from template */
             SSLDocument sslnewdoc = new SSLDocument(TEMPLATE_PATH_NAME);
-            sslnewdoc.AddAutoText(new string[] {"SSL-K12"});
+            sslnewdoc.BuildDocument(new string[] {"SSL-HED", "David C Meade Jr" });
             Console.WriteLine("Finished");
             Console.ReadLine();
         }

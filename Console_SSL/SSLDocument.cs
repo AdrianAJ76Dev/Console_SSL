@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -24,11 +25,11 @@ namespace Console_SSL
         private WordprocessingDocument wrddoc;
         private MainDocumentPart sslmdp;
         private Document ssldoc;
+        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
 
         private GlossaryDocumentPart gdp;
         private GlossaryDocument gd;
         private CBAutoText atx;
-        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
 
         public SSLDocument() { }
         public SSLDocument(string templatefullname)
@@ -42,7 +43,7 @@ namespace Console_SSL
             WordprocessingDocument newdoc = WordprocessingDocument.CreateFromTemplate(template);
             wrddoc = newdoc;
             sslmdp = newdoc.MainDocumentPart;
-            return newdoc.MainDocumentPart.Document;
+            return sslmdp.Document;
         }
 
         public void BuildDocument(string[] AutoTextName)
@@ -57,24 +58,11 @@ namespace Console_SSL
                 gd = gdp.GlossaryDocument;
                 foreach (string atxname in AutoTextName)
                 {
-                    atx = new CBAutoText(atxname, gd.DocParts);
-                    InsertAutoText();
+                    atx = new CBAutoText(atxname, gd.DocParts, ssldoc.Body);
+                    atx.Insert();
                 }
             }
             wrddoc.SaveAs(DOC_PATH_NAME);
-        }
-
-        public void InsertAutoText()
-        {
-            // When doing the signature content contrld this dies!
-            var cctrl = (from sdtCtrl in sslmdp.Document.Descendants<SdtElement>()
-                         where (sdtCtrl.Descendants<Tag>().First().Val.ToString() == atx.Category)
-                         || (sdtCtrl.Descendants<SdtAlias>().First().Val.ToString() == atx.Name)
-                         select sdtCtrl).Single();
-
-            Console.WriteLine();
-            Console.WriteLine("atxt.AutoTextContent InnerText: {0}", atx.Content);
-            cctrl.InnerXml = atx.Content;
         }
 
         class CBAutoText
@@ -82,23 +70,57 @@ namespace Console_SSL
             private string name = string.Empty;
             private string category = string.Empty;
             private string content = string.Empty;
-
             private string containername = string.Empty;
+            private string conatinercontent = string.Empty;
+            private Body sslbody;
 
-            public CBAutoText(string autotextname, DocParts gdps)
+            // The easiest way to link to the parent.
+
+            public CBAutoText(string autotextname, DocParts gdps, Body docbody)
             {
                 var atx = (from dp in gdps
-                            where dp.Descendants<DocPartProperties>().First().DocPartName.Val == autotextname
-                           select dp).Single();
+                            where dp.GetFirstChild<DocPartProperties>().DocPartName.Val == autotextname
+                            select dp).Single();
 
                 name = autotextname;
-                content = atx.First().InnerText;
-                category = atx.Descendants<DocPartProperties>().First().Category.Name.Val;
+                category = atx.GetFirstChild<DocPartProperties>().Category.Name.Val; 
+                content = atx.GetFirstChild<DocPartBody>().InnerXml;
+                sslbody = docbody;
             }
 
             public string Name { get { return name; } }
             public string Category { get { return category; } }
             public string Content { get { return content; } }
+
+            public void Insert()
+            {
+                Console.WriteLine("SdtElement is used");
+                var cctrl = (from sdtCtrl in sslbody.Descendants<SdtElement>()
+                            where sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == this.Category
+                            || sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == this.Name
+                            select sdtCtrl).Single();
+
+                switch (cctrl.GetType().Name)
+                {
+                    case "SdtRun":
+                        Console.WriteLine("Inserting this AutoText InnerXML==>{0}",this.Content);
+                        //Console.ReadLine();
+                        cctrl.GetFirstChild<SdtContentRun>().InnerXml=this.Content; 
+                        break;
+
+                    case "SdtBlock":
+                        Console.WriteLine("Inserting this AutoText InnerXML==>{0}", this.Content);
+                        //Console.ReadLine();
+                        cctrl.GetFirstChild<SdtContentBlock>().InnerXml=this.Content;
+                        break;
+
+                    default:
+                        break;
+                }
+
+                Console.WriteLine("Count after loop finished {0}", cctrl.Count());
+                Console.WriteLine();
+            }
         }
 
         class CBData { }

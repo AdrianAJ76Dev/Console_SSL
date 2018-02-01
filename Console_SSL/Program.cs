@@ -19,7 +19,16 @@ namespace Console_SSL
             const string TEMPLATE_PATH_NAME = @"D:\Dev Projects\SSL\Documents\Sole Source Letter v4.dotx";
             /* Create new document from template */
             SSLDocument sslnewdoc = new SSLDocument(TEMPLATE_PATH_NAME);
-            sslnewdoc.BuildDocument(new string[] {"SSL-HED", "David C Meade Jr" });
+            /*  AutoText Choices
+             * Jeremy Singer
+             * Auditi Chakravarty
+             * Trevor Packer
+             * Cyndie Schmeiser
+             * Trevor Packer
+             * SSL-K12
+             * SSL-HED
+             */
+            sslnewdoc.BuildDocument(new string[] {"SSL-K12", "Cyndie Schmeiser" });
             Console.WriteLine("Finished");
             Console.ReadLine();
         }

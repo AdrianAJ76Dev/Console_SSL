@@ -84,7 +84,7 @@ namespace Console_SSL
 
                 name = autotextname;
                 category = atx.GetFirstChild<DocPartProperties>().Category.Name.Val; 
-                content = atx.GetFirstChild<DocPartBody>().InnerXml;
+                content = atx.GetFirstChild<DocPartBody>().GetFirstChild<Paragraph>().InnerText;
                 sslbody = docbody;
             }
 
@@ -103,13 +103,17 @@ namespace Console_SSL
                 switch (cctrl.GetType().Name)
                 {
                     case "SdtRun":
-                        Console.WriteLine("Inserting this AutoText InnerXML==>{0}",this.Content);
+                        Console.WriteLine("Inserting this AutoText InnerXML==> {0}",this.Content);
+                        Console.WriteLine();
+                        Console.WriteLine("cctrl.InnerXml==> {0}", cctrl.GetFirstChild<SdtContentRun>().InnerXml);
                         //Console.ReadLine();
                         cctrl.GetFirstChild<SdtContentRun>().InnerXml=this.Content; 
                         break;
 
                     case "SdtBlock":
-                        Console.WriteLine("Inserting this AutoText InnerXML==>{0}", this.Content);
+                        Console.WriteLine("Inserting this AutoText InnerXML==> {0}", this.Content);
+                        Console.WriteLine();
+                        Console.WriteLine("cctrl.InnerXml==> {0}", cctrl.GetFirstChild<SdtContentBlock>().InnerXml);
                         //Console.ReadLine();
                         cctrl.GetFirstChild<SdtContentBlock>().InnerXml=this.Content;
                         break;

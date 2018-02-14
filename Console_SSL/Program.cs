@@ -18,8 +18,9 @@ namespace Console_SSL
         {
             const string TEMPLATE_PATH_NAME = @"D:\Dev Projects\SSL\Documents\Sole Source Letter v4.dotx";
             /* Create new document from template */
-            SSLDocument sslnewdoc = new SSLDocument(TEMPLATE_PATH_NAME);
-            /*  AutoText Choices
+            //SSLDocument sslnewdoc = new SSLDocument(TEMPLATE_PATH_NAME);
+            CMDocument newdoc = new CMDocument(TEMPLATE_PATH_NAME);
+            /* OLD AutoText Choices
              * Jeremy Singer
              * Auditi Chakravarty
              * Trevor Packer
@@ -28,7 +29,24 @@ namespace Console_SSL
              * SSL-K12
              * SSL-HED
              */
-            sslnewdoc.BuildDocument(new string[] {"SSL-K12", "Cyndie Schmeiser" });
+
+            /* NEW AutoText Choices
+             * TP - Category: Signatures
+             * AC - Category: Signatures
+             * JS - Category: Signatures
+             * DMJ - Category: Signatures
+             * HED - Category: Signatures
+             * K12 - Category: Signatures
+             * ***************************
+             * For the Future
+             * TVP - Category: Signatures
+             * ADC - Category: Signatures
+             * JYS - Category: Signatures
+             * DMJ - Category: Signatures
+             * ***************************
+            */
+            //sslnewdoc.BuildDocument(new string[] {"SSL-K12", "Cyndie Schmeiser" });
+            newdoc.BuildDocument(new string[] { "HED", "DMJ" });
             Console.WriteLine("Finished");
             Console.ReadLine();
         }

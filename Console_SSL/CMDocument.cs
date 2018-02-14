@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Drawing;
 using wrd10 = DocumentFormat.OpenXml.Office2010.Word;
 using wrd13 = DocumentFormat.OpenXml.Office2013.Word;
 
@@ -77,22 +78,6 @@ namespace Console_SSL
                          select sdtCtrl).Single();
 
             cctrl.InnerXml = atxt.Content;
-
-            //Drawing ImageSignatory = gDocPartBodySignatures.FirstOrDefault<DocPartBody>().Descendants<Drawing>().FirstOrDefault();
-            if (mdp.GetPartsCountOfType<GlossaryDocumentPart>() != 0)
-            {
-                GlossaryDocumentPart gNewDoc = mdp.GetPartsOfType<GlossaryDocumentPart>().FirstOrDefault();
-                DocumentFormat.OpenXml.Drawing.Blip blpSignature = mdp.Document.Descendants<DocumentFormat.OpenXml.Drawing.Blip>().FirstOrDefault();
-                string OldRelID = blpSignature.Embed.Value;
-                ImagePart ImageSignatory = (ImagePart)gNewDoc.GetPartById(OldRelID);
-                if (ImageSignatory != null)
-                {
-                    // Fails here because it ASSIGNED a relationship ID the 1st time around
-                    mdp.CreateRelationshipToPart(ImageSignatory, "rId30");
-                    blpSignature.Embed.Value = "rId30";
-                }
-            }
-
         }
 
     }
@@ -137,9 +122,26 @@ namespace Console_SSL
                            select dp).Single();
 
                 category = atxt.GetFirstChild<DocPartProperties>().Category.Name.Val;
+                if (atxt.GetFirstChild<DocPartBody>().Descendants<Drawing>()!=null)
+                {
+                    CheckIfImageInAutoText();
+                }
+
                 content = atxt.GetFirstChild<DocPartBody>().Descendants<SdtElement>().FirstOrDefault().InnerXml;
             }
         }
 
+        private void CheckIfImageInAutoText()
+        {
+            Blip blpSignature = mdp.Document.Descendants<Blip>().FirstOrDefault();
+            string OldRelID = blpSignature.Embed.Value;
+            ImagePart ImageSignatory = (ImagePart)gNewDoc.GetPartById(OldRelID);
+            if (ImageSignatory != null)
+            {
+                // Fails here because it ASSIGNED a relationship ID the 1st time around
+                mdp.CreateRelationshipToPart(ImageSignatory, "rId30");
+                blpSignature.Embed.Value = "rId30";
+            }
+        }
     }
 }

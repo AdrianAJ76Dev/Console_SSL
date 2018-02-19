@@ -32,6 +32,7 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
+        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
         private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
 
         private CBAutoText atxt;
@@ -80,6 +81,19 @@ namespace Console_SSL
             cctrl.InnerXml = atxt.Content;
         }
 
+        public void CheckIfImageInAutoText()
+        {
+            Blip blpSignature = mdp.Document.Descendants<Blip>().FirstOrDefault();
+            string OldRelID = blpSignature.Embed.Value;
+            ImagePart ImageSignatory = (ImagePart)gNewDoc.GetPartById(OldRelID);
+            if (ImageSignatory != null)
+            {
+                // Fails here because it ASSIGNED a relationship ID the 1st time around
+                mdp.CreateRelationshipToPart(ImageSignatory, "rId30");
+                blpSignature.Embed.Value = "rId30";
+            }
+        }
+
     }
 
     class CBAutoText
@@ -87,6 +101,9 @@ namespace Console_SSL
         private string name = string.Empty;
         private string category = string.Empty;
         private string content = string.Empty;
+
+        // 02-15-2018 addition
+        private bool AutoTextHasARelation;
 
         private GlossaryDocument gdoc;
         private DocParts dps;
@@ -122,25 +139,15 @@ namespace Console_SSL
                            select dp).Single();
 
                 category = atxt.GetFirstChild<DocPartProperties>().Category.Name.Val;
-                if (atxt.GetFirstChild<DocPartBody>().Descendants<Drawing>()!=null)
-                {
-                    CheckIfImageInAutoText();
-                }
+
+
+                // Look at IdPartPairs instead of checking for relationships
+                //if (atxt.GetFirstChild<DocPartBody>().Descendants<Drawing>()!=null)
+                //{
+                //    CheckIfImageInAutoText();
+                //}
 
                 content = atxt.GetFirstChild<DocPartBody>().Descendants<SdtElement>().FirstOrDefault().InnerXml;
-            }
-        }
-
-        private void CheckIfImageInAutoText()
-        {
-            Blip blpSignature = mdp.Document.Descendants<Blip>().FirstOrDefault();
-            string OldRelID = blpSignature.Embed.Value;
-            ImagePart ImageSignatory = (ImagePart)gNewDoc.GetPartById(OldRelID);
-            if (ImageSignatory != null)
-            {
-                // Fails here because it ASSIGNED a relationship ID the 1st time around
-                mdp.CreateRelationshipToPart(ImageSignatory, "rId30");
-                blpSignature.Embed.Value = "rId30";
             }
         }
     }

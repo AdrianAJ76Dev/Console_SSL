@@ -32,7 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -46,6 +47,7 @@ namespace Console_SSL
         {
             WordprocessingDocument newdoc = WordprocessingDocument.CreateFromTemplate(template);
             wrddoc = newdoc;
+            wrddoc.SaveAs(DOC_PATH_NAME);
             mdp = newdoc.MainDocumentPart;
             return mdp.Document;
         }
@@ -64,20 +66,21 @@ namespace Console_SSL
                     atxt.ParentMdp = mdp;
                     atxt.GDP = gdp;
                     atxt.Name = atxname;
- 
                     Console.WriteLine("AutoText Name ==> {0}", atxt.Name);
+
                     atxt.IdentifyPartsAndRelationships();
                     atxt.IdentifyPartsAndRelationshipsMDP();
-
+                    atxt.InvestigatingDocPart();
                     ReplaceContentControlWithAutoTextInAContentControl();
-                    wrddoc.SaveAs(DOC_PATH_NAME);
                 }
+                wrddoc.SaveAs(DOC_PATH_NAME);
             }
         }
 
         private void ReplaceContentControlWithAutoTextInAContentControl()
         {
             Console.WriteLine("Count of Content Controls is {0}\n", doc.Body.Descendants<SdtElement>().Count());
+            Console.ReadLine();
             var cctrl = (from sdtCtrl in doc.Body.Descendants<SdtElement>()
                          where sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == atxt.Category
                          || sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == atxt.Name
@@ -111,7 +114,7 @@ namespace Console_SSL
         private GlossaryDocumentPart gdp;
         private GlossaryDocument gdoc;
         private DocParts dps;
-        private DocPart dp;
+        //private DocPart dp;
 
         // The description & content of AutoText
         private DocPartProperties autotextprops;
@@ -123,6 +126,8 @@ namespace Console_SSL
 
         // The content of the content control
         private SdtElement autotextcontentcontrol;
+
+        private OpenXmlElement autotextDocPart;
         
         // Fields
         private string name = string.Empty;             // This is how I reference/call the AutoText
@@ -168,6 +173,25 @@ namespace Console_SSL
             }
         }
 
+        public void InvestigatingDocPart()
+        {
+            int ElementCount = autotextDocPart.Elements().Count();
+            Console.WriteLine("AutoText Element Count ==> {0} = {1}", autotextDocPart.LocalName,  ElementCount);
+            foreach (OpenXmlElement item in autotextDocPart.Elements())
+            {
+                Console.WriteLine("Item Name ==> {0}",item.LocalName);
+            }
+
+
+            ElementCount = autotextDocPart.GetFirstChild<DocPartBody>().Elements().Count();
+            Console.WriteLine("AutoText Body Element Count ==> {0} = {1}", autotextDocPart.LocalName, ElementCount);
+            foreach (OpenXmlElement item in autotextDocPart.GetFirstChild<DocPartBody>().Elements())
+            {
+                Console.WriteLine("Item Name ==> {0}", item.LocalName);
+            }
+            Console.WriteLine("Relationship Type ==> {0}", parentmdp.RelationshipType);
+        }
+
         // Properties for the fields
         public string Category { get { return category; } }
         public string Content { get { return content; } }
@@ -185,19 +209,10 @@ namespace Console_SSL
                            where dp.GetFirstChild<DocPartProperties>().DocPartName.Val == name
                            select dp).Single();
 
-                int ElementCount = atxt.GetFirstChild<DocPartBody>().Elements().Count();
-                Console.WriteLine("Element Count ==> {0}", ElementCount);
-                Console.WriteLine();
-                foreach (OpenXmlElement elem in atxt.GetFirstChild<DocPartBody>().Elements())
-                {
-                    Console.WriteLine("elem Name ==> {0}", elem.LocalName);
-                    Console.WriteLine("elem Type ==> {0}", elem.GetType().Name);
-                    Console.WriteLine();
-                    Console.ReadLine();
-                }
-
                 category = atxt.GetFirstChild<DocPartProperties>().Category.Name.Val;
                 content = atxt.GetFirstChild<DocPartBody>().Descendants<SdtElement>().FirstOrDefault().InnerXml;
+
+                autotextDocPart = atxt;
             }
         }
     }

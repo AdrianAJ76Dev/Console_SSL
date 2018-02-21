@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -68,8 +68,8 @@ namespace Console_SSL
                     atxt.Name = atxname;
                     Console.WriteLine("AutoText Name ==> {0}", atxt.Name);
 
-                    atxt.IdentifyPartsAndRelationships();
-                    atxt.IdentifyPartsAndRelationshipsMDP();
+                    //atxt.IdentifyPartsAndRelationships();
+                    //atxt.IdentifyPartsAndRelationshipsMDP();
                     atxt.InvestigatingDocPart();
                     ReplaceContentControlWithAutoTextInAContentControl();
                 }
@@ -112,21 +112,9 @@ namespace Console_SSL
         // The MS Word Document Parts or XML containers
         private MainDocumentPart parentmdp;
         private GlossaryDocumentPart gdp;
-        private GlossaryDocument gdoc;
         private DocParts dps;
-        //private DocPart dp;
 
         // The description & content of AutoText
-        private DocPartProperties autotextprops;
-        private DocPartBody autotextbody;
-
-        // Description/Properties of content control
-        private SdtAlias contentcontrolname;
-        private Tag contentcontroltag;
-
-        // The content of the content control
-        private SdtElement autotextcontentcontrol;
-
         private OpenXmlElement autotextDocPart;
         
         // Fields
@@ -134,6 +122,8 @@ namespace Console_SSL
         private string category = string.Empty;         // This is the name of the content control the AutoText goes in
         private string content = string.Empty;          // This is the contents of the AutoText: Content Control with text all retrieved as XML
         private string containername = string.Empty;    // This IS the SAME as category. Category is where AutoText keeps the name of its content control
+        private bool hasrelationship = false;
+        private string relationshipid = string.Empty;
 
         public CBAutoText() { }
 
@@ -177,42 +167,41 @@ namespace Console_SSL
         {
             int DescendentsCount = autotextDocPart.GetFirstChild<DocPartBody>().Descendants().Count();
             Console.WriteLine("Descendents Count ==> {0}",DescendentsCount);
+            CheckForRelationshipInAutoTextEntry();
+
+            /*
             foreach (OpenXmlElement item in autotextDocPart.GetFirstChild<DocPartBody>().Descendants())
             {
-                Console.WriteLine("OpenXmlElement:Local Name ==> {0}",item.LocalName);
+                Console.WriteLine("OpenXmlElement:Local Name ==> {0}", item.LocalName);
                 Console.WriteLine("OpenXmlElement:Attr Count ==> {0}", item.GetAttributes().Count());
                 foreach (var attr in item.GetAttributes())
                 {
-                    Console.WriteLine("Attr Name ==> {0}",attr.LocalName);
-                    Console.WriteLine("Attr Namespace URI ==> {0}",attr.NamespaceUri);
-                    Console.WriteLine("Attr Value ==> {0}",attr.Value);
+                    Console.WriteLine("Attr Value ==> {0}", attr.Value);
+                    Console.WriteLine("Attr Name ==> {0}", attr.LocalName);
+                    Console.WriteLine("Attr Namespace URI ==> {0}", attr.NamespaceUri);
                 }
             }
-
-            /*
-            int ElementCount = autotextDocPart.Elements().Count();
-            Console.WriteLine("AutoText Element Count ==> {0} = {1}", autotextDocPart.LocalName,  ElementCount);
-            Console.WriteLine("Count of Nodes ==> {0}", autotextDocPart.GetFirstChild<DocPartBody>().ChildElements.Count);
-           foreach (OpenXmlElement item in autotextDocPart.Elements())
-            {
-                Console.WriteLine("Item Name ==> {0}",item.LocalName);
-                Console.WriteLine("Namespace Prefix ==> {0}",item.Prefix);
-                Console.WriteLine("Look up Namespace via Prefix {0}", item.LookupNamespace(item.Prefix));
-            }
-            Console.WriteLine();
-
-            ElementCount = autotextDocPart.GetFirstChild<DocPartBody>().Elements().Count();
-            Console.WriteLine("AutoText Body Element Count ==> {0} = {1}", autotextDocPart.LocalName, ElementCount);
-            Console.WriteLine("Count of Nodes ==> {0}", autotextDocPart.GetFirstChild<DocPartBody>().ChildElements.Count);
-           foreach (OpenXmlElement item in autotextDocPart.GetFirstChild<DocPartBody>().Elements())
-            {
-                Console.WriteLine("Item Name ==> {0}", item.LocalName);
-                Console.WriteLine("Namespace Prefix ==> {0}",item.Prefix);
-                Console.WriteLine("Look up Namespace via Prefix {0}", item.LookupNamespace(item.Prefix));
-            }
-            Console.WriteLine("Relationship Type ==> {0}", parentmdp.RelationshipType);
             */
+
             Console.WriteLine();
+        }
+
+        
+        private void CheckForRelationshipInAutoTextEntry()
+        {
+            var elem = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants()
+                       where (from attr in el.GetAttributes() select attr.Value).Contains<string>("rId")
+                       select el).Single(); // Need a projection here to somehow retrieve the found ID
+
+            if (elem != null)
+            {
+                hasrelationship = true;
+            }
+            else
+                hasrelationship = false;
+
+            Console.WriteLine("{0}", elem.LocalName);
+            Console.ReadLine();
         }
 
         // Properties for the fields
@@ -237,6 +226,10 @@ namespace Console_SSL
 
                 autotextDocPart = atxt;
             }
+        }
+        public string RelationshipID
+        {
+            get { return relationshipid; }
         }
     }
 }

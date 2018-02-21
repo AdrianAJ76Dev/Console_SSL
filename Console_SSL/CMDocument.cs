@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -175,21 +175,44 @@ namespace Console_SSL
 
         public void InvestigatingDocPart()
         {
-            int ElementCount = autotextDocPart.Elements().Count();
-            Console.WriteLine("AutoText Element Count ==> {0} = {1}", autotextDocPart.LocalName,  ElementCount);
-            foreach (OpenXmlElement item in autotextDocPart.Elements())
+            int DescendentsCount = autotextDocPart.GetFirstChild<DocPartBody>().Descendants().Count();
+            Console.WriteLine("Descendents Count ==> {0}",DescendentsCount);
+            foreach (OpenXmlElement item in autotextDocPart.GetFirstChild<DocPartBody>().Descendants())
             {
-                Console.WriteLine("Item Name ==> {0}",item.LocalName);
+                Console.WriteLine("OpenXmlElement:Local Name ==> {0}",item.LocalName);
+                Console.WriteLine("OpenXmlElement:Attr Count ==> {0}", item.GetAttributes().Count());
+                foreach (var attr in item.GetAttributes())
+                {
+                    Console.WriteLine("Attr Name ==> {0}",attr.LocalName);
+                    Console.WriteLine("Attr Namespace URI ==> {0}",attr.NamespaceUri);
+                    Console.WriteLine("Attr Value ==> {0}",attr.Value);
+                }
             }
 
+            /*
+            int ElementCount = autotextDocPart.Elements().Count();
+            Console.WriteLine("AutoText Element Count ==> {0} = {1}", autotextDocPart.LocalName,  ElementCount);
+            Console.WriteLine("Count of Nodes ==> {0}", autotextDocPart.GetFirstChild<DocPartBody>().ChildElements.Count);
+           foreach (OpenXmlElement item in autotextDocPart.Elements())
+            {
+                Console.WriteLine("Item Name ==> {0}",item.LocalName);
+                Console.WriteLine("Namespace Prefix ==> {0}",item.Prefix);
+                Console.WriteLine("Look up Namespace via Prefix {0}", item.LookupNamespace(item.Prefix));
+            }
+            Console.WriteLine();
 
             ElementCount = autotextDocPart.GetFirstChild<DocPartBody>().Elements().Count();
             Console.WriteLine("AutoText Body Element Count ==> {0} = {1}", autotextDocPart.LocalName, ElementCount);
-            foreach (OpenXmlElement item in autotextDocPart.GetFirstChild<DocPartBody>().Elements())
+            Console.WriteLine("Count of Nodes ==> {0}", autotextDocPart.GetFirstChild<DocPartBody>().ChildElements.Count);
+           foreach (OpenXmlElement item in autotextDocPart.GetFirstChild<DocPartBody>().Elements())
             {
                 Console.WriteLine("Item Name ==> {0}", item.LocalName);
+                Console.WriteLine("Namespace Prefix ==> {0}",item.Prefix);
+                Console.WriteLine("Look up Namespace via Prefix {0}", item.LookupNamespace(item.Prefix));
             }
             Console.WriteLine("Relationship Type ==> {0}", parentmdp.RelationshipType);
+            */
+            Console.WriteLine();
         }
 
         // Properties for the fields

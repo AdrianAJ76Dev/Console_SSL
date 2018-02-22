@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -189,19 +189,18 @@ namespace Console_SSL
         
         private void CheckForRelationshipInAutoTextEntry()
         {
-            var elem = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants()
-                       where (from attr in el.GetAttributes() select attr.Value).Contains<string>("rId")
-                       select el).Single(); // Need a projection here to somehow retrieve the found ID
+            var foundattr = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants()
+                            where el.HasAttributes
+                            select (from attr in el.GetAttributes()
+                                    where attr.Value.Contains("rId")
+                                    select new { ElementName = el.LocalName, RelId = attr.Value });
+                                
+            foundattr
 
-            if (elem != null)
+            foreach (var item in foundattr)
             {
-                hasrelationship = true;
+                Console.WriteLine("{0}", item);
             }
-            else
-                hasrelationship = false;
-
-            Console.WriteLine("{0}", elem.LocalName);
-            Console.ReadLine();
         }
 
         // Properties for the fields

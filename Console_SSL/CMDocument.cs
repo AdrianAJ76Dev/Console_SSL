@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -70,10 +70,12 @@ namespace Console_SSL
 
                     //atxt.IdentifyPartsAndRelationships();
                     //atxt.IdentifyPartsAndRelationshipsMDP();
-                    atxt.InvestigatingDocPart();
-                    ReplaceContentControlWithAutoTextInAContentControl();
+                    //atxt.InvestigatingDocPart();
+                    atxt.CheckForRelationshipInAutoTextEntry();
+                    Console.ReadLine();
+                    //ReplaceContentControlWithAutoTextInAContentControl();
                 }
-                wrddoc.SaveAs(DOC_PATH_NAME);
+                //wrddoc.SaveAs(DOC_PATH_NAME);
             }
         }
 
@@ -187,19 +189,18 @@ namespace Console_SSL
         }
 
         
-        private void CheckForRelationshipInAutoTextEntry()
+        public void CheckForRelationshipInAutoTextEntry()
         {
-            var foundattr = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants()
-                            where el.HasAttributes
-                            select (from attr in el.GetAttributes()
-                                    where attr.Value.Contains("rId")
-                                    select new { ElementName = el.LocalName, RelId = attr.Value });
-                                
-            foundattr
+            var aAttr = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+                        where el.HasAttributes
+                        select el.GetAttributes();
 
-            foreach (var item in foundattr)
+            var attr = from attrb in aAttr
+                       select attrb;
+
+            foreach (var item in attr)
             {
-                Console.WriteLine("{0}", item);
+                Console.WriteLine("Item ToString ==> {0}",item.);
             }
         }
 

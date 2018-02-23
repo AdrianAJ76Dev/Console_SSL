@@ -194,13 +194,24 @@ namespace Console_SSL
             var aAttr = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
                         where el.HasAttributes
                         select el.GetAttributes();
+            foreach (var eattr in aAttr)
+            {
+                Console.WriteLine("Count of eattr Items ==> {0}", eattr.Count()); 
+                foreach (var item in eattr)
+                {
+                    Console.WriteLine("\t{1}:Item Value ==> {0}", item.Value, item.LocalName); 
+                }
+            }
 
             var attr = from attrb in aAttr
                        select attrb;
-
-            foreach (var item in attr)
+            foreach (var items in attr)
             {
-                Console.WriteLine("Item ToString ==> {0}",item.);
+                Console.WriteLine("Items Count ==> {0}", items.Count());
+                foreach (var item in items)
+                {
+                    Console.WriteLine("\t{1}:Item Value ==> {0}", item.Value,item.LocalName);
+                }
             }
         }
 

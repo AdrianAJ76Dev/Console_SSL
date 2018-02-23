@@ -17,7 +17,7 @@ namespace Console_SSL
         static void Main(string[] args)
         {
             //const string TEMPLATE_PATH_NAME = @"D:\Dev Projects\SSL\Documents\Sole Source Letter v4.dotx";
-            const string TEMPLATE_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\Sole Source Letter v4.dotx";
+            const string TEMPLATE_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\Sole Source Letter v5.dotx";
             /* Create new document from template */
             //SSLDocument sslnewdoc = new SSLDocument(TEMPLATE_PATH_NAME);
             CMDocument newdoc = new CMDocument(TEMPLATE_PATH_NAME);

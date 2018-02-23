@@ -191,12 +191,43 @@ namespace Console_SSL
         
         public void CheckForRelationshipInAutoTextEntry()
         {
-            var aAttr = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+            var aElem = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+                         where el.HasAttributes
+                         select el).ToList();
+
+            // What follows is a breakdown of the above LINQ expression
+            foreach (var elem in aElem)
+            {
+                Console.WriteLine("Element Name ==> {0}\t{1}", elem.LocalName, elem.GetType().Name);
+            }
+
+            Console.ReadLine();
+
+            var aAttrb = (from elem in aElem
+                          select elem.GetAttributes()).ToList();
+
+            //foreach (var attr in aAttrb)
+            //{
+            //    Console.WriteLine("Attribute Name ==> {0}\t{1}", attr. ,attr.GetType().Name);
+            //}
+
+
+
+
+            //var aAttrb1 = (from att in aAttrb
+            //               where att. //.value.Contains<string>("rId")
+            //              select att).ToList();
+
+            
+            /*
+            var aAttr = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
                         where el.HasAttributes
-                        select el.GetAttributes();
+                        select el.GetAttributes()).ToList();
+
+
             foreach (var eattr in aAttr)
             {
-                Console.WriteLine("Count of eattr Items ==> {0}", eattr.Count()); 
+                Console.WriteLine("Count of eattr Items ==> {0}", eattr.Count());
                 foreach (var item in eattr)
                 {
                     Console.WriteLine("\t{1}:Item Value ==> {0}", item.Value, item.LocalName); 
@@ -213,6 +244,7 @@ namespace Console_SSL
                     Console.WriteLine("\t{1}:Item Value ==> {0}", item.Value,item.LocalName);
                 }
             }
+            */
         }
 
         // Properties for the fields

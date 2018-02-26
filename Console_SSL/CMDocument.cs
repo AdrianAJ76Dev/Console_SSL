@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -62,10 +62,12 @@ namespace Console_SSL
             {
                 foreach (string atxname in AutoTextName)
                 {
-                    atxt = new CBAutoText();
-                    atxt.ParentMdp = mdp;
-                    atxt.GDP = gdp;
-                    atxt.Name = atxname;
+                    atxt = new CBAutoText
+                    {
+                        ParentMdp = mdp,
+                        GDP = gdp,
+                        Name = atxname
+                    };
                     Console.WriteLine("AutoText Name ==> {0}", atxt.Name);
 
                     //atxt.IdentifyPartsAndRelationships();
@@ -188,9 +190,9 @@ namespace Console_SSL
             Console.WriteLine();
         }
 
-        
         public void CheckForRelationshipInAutoTextEntry()
         {
+            /*
             var aElem = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
                          where el.HasAttributes
                          select el).ToList();
@@ -216,17 +218,21 @@ namespace Console_SSL
             }
 
             Console.ReadLine();
+            */
 
-            var RelID = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+            var RelID = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
                           where el.HasAttributes
-                          select (from attr in el.GetAttributes()
+                          select from attr in el.GetAttributes()
                                   where attr.Value.Contains("rId")
-                                  select attr.Value);
+                                  select attr).ToList();
 
             Console.WriteLine("RelID Count ==> {0}", RelID.Count());
             foreach (var item in RelID)
             {
-                Console.WriteLine("item count ==> {0}", item.Count());
+                if (item.Count()>0)
+                {
+                    Console.WriteLine("item Value ==> {0}", item.Single().Value);
+                }
             }
             Console.ReadLine();
 

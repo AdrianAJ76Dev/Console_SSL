@@ -116,7 +116,7 @@ namespace Console_SSL
                     {
                         // Figure out what to switch on.  It'll be on OpenXmlPart Type
                         case "ImagePart":
-                            ImagePart ImageSignatory = (ImagePart)gdp.GetPartById(relshpID);
+                            ImagePart ImageSignatory = (ImagePart)AutoTextRelationshipPart;
                             if (ImageSignatory != null)
                             {
                                 mdp.CreateRelationshipToPart(ImageSignatory, "rId20"); //This hardcoded Relationship ID has to be changed.

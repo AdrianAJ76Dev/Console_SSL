@@ -73,7 +73,6 @@ namespace Console_SSL
                     //atxt.IdentifyPartsAndRelationships();
                     //atxt.IdentifyPartsAndRelationshipsMDP();
                     //atxt.InvestigatingDocPart();
-                    atxt.CheckForRelationshipInAutoTextEntry();
                     Console.ReadLine();
                     //ReplaceContentControlWithAutoTextInAContentControl();
                 }
@@ -127,7 +126,7 @@ namespace Console_SSL
         private string content = string.Empty;          // This is the contents of the AutoText: Content Control with text all retrieved as XML
         private string containername = string.Empty;    // This IS the SAME as category. Category is where AutoText keeps the name of its content control
         private bool hasrelationship = false;
-        private string relationshipid = string.Empty;
+        private string [] relationshipids;
 
         public CBAutoText() { }
 
@@ -171,27 +170,13 @@ namespace Console_SSL
         {
             int DescendentsCount = autotextDocPart.GetFirstChild<DocPartBody>().Descendants().Count();
             Console.WriteLine("Descendents Count ==> {0}",DescendentsCount);
-            CheckForRelationshipInAutoTextEntry();
-
-            /*
-            foreach (OpenXmlElement item in autotextDocPart.GetFirstChild<DocPartBody>().Descendants())
-            {
-                Console.WriteLine("OpenXmlElement:Local Name ==> {0}", item.LocalName);
-                Console.WriteLine("OpenXmlElement:Attr Count ==> {0}", item.GetAttributes().Count());
-                foreach (var attr in item.GetAttributes())
-                {
-                    Console.WriteLine("Attr Value ==> {0}", attr.Value);
-                    Console.WriteLine("Attr Name ==> {0}", attr.LocalName);
-                    Console.WriteLine("Attr Namespace URI ==> {0}", attr.NamespaceUri);
-                }
-            }
-            */
-
             Console.WriteLine();
         }
 
-        public string CheckForRelationshipInAutoTextEntry()
+        private void CheckForRelationshipInAutoTextEntry()
         {
+            hasrelationship = false;
+            int i = 0;
             var ElementsWithRelID = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
                                         where el.HasAttributes
                                         select from attr in el.GetAttributes()
@@ -202,15 +187,17 @@ namespace Console_SSL
                 foreach (var relid in elems)
                 {
                     hasrelationship = true;
-                    return relid.ToString();
+                    relationshipids[i] = relid.ToString();
+                    i+=1;
                 }
             }
-            return string.Empty;
         }
 
         // Properties for the fields
         public string Category { get { return category; } }
         public string Content { get { return content; } }
+        public string [] RelationshipID { get { return relationshipids; } }
+        public bool HasARelationship { get { return hasrelationship; } }
         public string Name
         {
             get
@@ -230,10 +217,6 @@ namespace Console_SSL
 
                 autotextDocPart = atxt;
             }
-        }
-        public string RelationshipID
-        {
-            get { return relationshipid; }
         }
     }
 }

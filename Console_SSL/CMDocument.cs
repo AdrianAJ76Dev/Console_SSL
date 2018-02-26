@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -198,7 +198,7 @@ namespace Console_SSL
             // What follows is a breakdown of the above LINQ expression
             foreach (var elem in aElem)
             {
-                Console.WriteLine("Element Name ==> {0}\t{1}", elem.LocalName, elem.GetType().Name);
+                Console.WriteLine("Element Name ==> {0}\tType ==> {1}\tValue ==> {2}", elem.LocalName, elem.GetType().Name,elem.InnerXml);
             }
 
             Console.ReadLine();
@@ -206,45 +206,31 @@ namespace Console_SSL
             var aAttrb = (from elem in aElem
                           select elem.GetAttributes()).ToList();
 
-            //foreach (var attr in aAttrb)
-            //{
-            //    Console.WriteLine("Attribute Name ==> {0}\t{1}", attr. ,attr.GetType().Name);
-            //}
-
-
-
-
-            //var aAttrb1 = (from att in aAttrb
-            //               where att. //.value.Contains<string>("rId")
-            //              select att).ToList();
-
-            
-            /*
-            var aAttr = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
-                        where el.HasAttributes
-                        select el.GetAttributes()).ToList();
-
-
-            foreach (var eattr in aAttr)
+            foreach (var attrs in aAttrb)
             {
-                Console.WriteLine("Count of eattr Items ==> {0}", eattr.Count());
-                foreach (var item in eattr)
+                foreach (var attr in attrs)
                 {
-                    Console.WriteLine("\t{1}:Item Value ==> {0}", item.Value, item.LocalName); 
+                    Console.WriteLine("Attribute Name ==> {0}\tValue ==> {1}", attr.XName, attr.Value);
                 }
+                
             }
 
-            var attr = from attrb in aAttr
-                       select attrb;
-            foreach (var items in attr)
+            Console.ReadLine();
+
+            var RelID = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+                          where el.HasAttributes
+                          select (from attr in el.GetAttributes()
+                                  where attr.Value.Contains("rId")
+                                  select attr.Value);
+
+            Console.WriteLine("RelID Count ==> {0}", RelID.Count());
+            foreach (var item in RelID)
             {
-                Console.WriteLine("Items Count ==> {0}", items.Count());
-                foreach (var item in items)
-                {
-                    Console.WriteLine("\t{1}:Item Value ==> {0}", item.Value,item.LocalName);
-                }
+                Console.WriteLine("item count ==> {0}", item.Count());
             }
-            */
+            Console.ReadLine();
+
+        
         }
 
         // Properties for the fields

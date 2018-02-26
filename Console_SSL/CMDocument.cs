@@ -70,13 +70,36 @@ namespace Console_SSL
                     };
                     Console.WriteLine("AutoText Name ==> {0}", atxt.Name);
 
+                    // Create a new relationship in the NEW document with the AutoText FOUND in the template
+                    atxt.CheckForRelationshipInAutoTextEntry();
+
                     //atxt.IdentifyPartsAndRelationships();
                     //atxt.IdentifyPartsAndRelationshipsMDP();
                     //atxt.InvestigatingDocPart();
+                    ReplaceContentControlWithAutoTextInAContentControl();
                     Console.ReadLine();
-                    //ReplaceContentControlWithAutoTextInAContentControl();
                 }
                 //wrddoc.SaveAs(DOC_PATH_NAME);
+
+                // Form the relationships found in the AutoText in the Glossary Document
+                foreach (string relshpID in atxt.RelationshipID)
+                {
+                    OpenXmlPart AutoTextRelationshipPart = gdp.GetPartById(relshpID);
+                    switch (AutoTextRelationshipPart.GetType().Name)
+                    {
+                        // Figure out what to switch on.  It'll be on OpenXmlPart Type
+                        case "ImagePart":
+                            ImagePart ImageSignatory = (ImagePart)gdp.GetPartById(relshpID);
+                            if (ImageSignatory != null)
+                            {
+                                mdp.CreateRelationshipToPart(ImageSignatory, "rId20"); //This hardcoded Relationship ID has to be changed.
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
             }
         }
 
@@ -92,7 +115,6 @@ namespace Console_SSL
             //CheckIfImageInAutoText();
             cctrl.InnerXml = atxt.Content;
         }
-
         private void CheckIfImageInAutoText()
         {
             Blip blpSignature = mdp.Document.Descendants<Blip>().FirstOrDefault();
@@ -108,6 +130,7 @@ namespace Console_SSL
             }
         }
     }
+}
 
     class CBAutoText
     {
@@ -173,7 +196,7 @@ namespace Console_SSL
             Console.WriteLine();
         }
 
-        private void CheckForRelationshipInAutoTextEntry()
+        public void CheckForRelationshipInAutoTextEntry()
         {
             hasrelationship = false;
             int i = 0;
@@ -219,4 +242,3 @@ namespace Console_SSL
             }
         }
     }
-}

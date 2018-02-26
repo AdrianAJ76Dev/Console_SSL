@@ -52,56 +52,6 @@ namespace Console_SSL
             return mdp.Document;
         }
 
-        public void BuildDocument(string[] AutoTextName)
-        {
-            /* Here's where I look in the Glossary Document Part to determine it there IS AutoText
-             * If there isn't, then there's no use in creating the List of AutoText objects!
-             */
-            gdp = mdp.GlossaryDocumentPart;
-            if (gdp != null)
-            {
-                foreach (string atxname in AutoTextName)
-                {
-                    atxt = new CBAutoText
-                    {
-                        ParentMdp = mdp,
-                        GDP = gdp,
-                        Name = atxname
-                    };
-                    Console.WriteLine("AutoText Name ==> {0}", atxt.Name);
-
-                    // Create a new relationship in the NEW document with the AutoText FOUND in the template
-                    atxt.CheckForRelationshipInAutoTextEntry();
-
-                    //atxt.IdentifyPartsAndRelationships();
-                    //atxt.IdentifyPartsAndRelationshipsMDP();
-                    //atxt.InvestigatingDocPart();
-                    ReplaceContentControlWithAutoTextInAContentControl();
-                    Console.ReadLine();
-                }
-                //wrddoc.SaveAs(DOC_PATH_NAME);
-
-                // Form the relationships found in the AutoText in the Glossary Document
-                foreach (string relshpID in atxt.RelationshipID)
-                {
-                    OpenXmlPart AutoTextRelationshipPart = gdp.GetPartById(relshpID);
-                    switch (AutoTextRelationshipPart.GetType().Name)
-                    {
-                        // Figure out what to switch on.  It'll be on OpenXmlPart Type
-                        case "ImagePart":
-                            ImagePart ImageSignatory = (ImagePart)gdp.GetPartById(relshpID);
-                            if (ImageSignatory != null)
-                            {
-                                mdp.CreateRelationshipToPart(ImageSignatory, "rId20"); //This hardcoded Relationship ID has to be changed.
-                            }
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
 
         private void ReplaceContentControlWithAutoTextInAContentControl()
         {
@@ -129,6 +79,56 @@ namespace Console_SSL
                 }
             }
         }
+        public void BuildDocument(string[] AutoTextName)
+        {
+            /* Here's where I look in the Glossary Document Part to determine it there IS AutoText
+             * If there isn't, then there's no use in creating the List of AutoText objects!
+             */
+            gdp = mdp.GlossaryDocumentPart;
+            if (gdp != null)
+            {
+                foreach (string atxname in AutoTextName)
+                {
+                    atxt = new CBAutoText
+                    {
+                        ParentMdp = mdp,
+                        GDP = gdp,
+                        Name = atxname
+                    };
+                    Console.WriteLine("AutoText Name ==> {0}", atxt.Name);
+
+                    // Create a new relationship in the NEW document with the AutoText FOUND in the template
+                    atxt.CheckForRelationshipInAutoTextEntry();
+
+                    //atxt.IdentifyPartsAndRelationships();
+                    //atxt.IdentifyPartsAndRelationshipsMDP();
+                    //atxt.InvestigatingDocPart();
+                    ReplaceContentControlWithAutoTextInAContentControl();
+                    Console.ReadLine();
+                }
+                wrddoc.SaveAs(DOC_PATH_NAME);
+
+                // Form the relationships found in the AutoText in the Glossary Document
+                foreach (string relshpID in atxt.RelationshipID)
+                {
+                    OpenXmlPart AutoTextRelationshipPart = gdp.GetPartById(relshpID);
+                    switch (AutoTextRelationshipPart.GetType().Name)
+                    {
+                        // Figure out what to switch on.  It'll be on OpenXmlPart Type
+                        case "ImagePart":
+                            ImagePart ImageSignatory = (ImagePart)gdp.GetPartById(relshpID);
+                            if (ImageSignatory != null)
+                            {
+                                mdp.CreateRelationshipToPart(ImageSignatory, "rId20"); //This hardcoded Relationship ID has to be changed.
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -149,9 +149,12 @@ namespace Console_SSL
         private string content = string.Empty;          // This is the contents of the AutoText: Content Control with text all retrieved as XML
         private string containername = string.Empty;    // This IS the SAME as category. Category is where AutoText keeps the name of its content control
         private bool hasrelationship = false;
-        private string [] relationshipids;
+        private List<string> relationshipids;
 
-        public CBAutoText() { }
+        public CBAutoText()
+        {
+            relationshipids = new List<string>();
+        }
 
         public MainDocumentPart ParentMdp
         {
@@ -199,7 +202,6 @@ namespace Console_SSL
         public void CheckForRelationshipInAutoTextEntry()
         {
             hasrelationship = false;
-            int i = 0;
             var ElementsWithRelID = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
                                         where el.HasAttributes
                                         select from attr in el.GetAttributes()
@@ -210,8 +212,7 @@ namespace Console_SSL
                 foreach (var relid in elems)
                 {
                     hasrelationship = true;
-                    relationshipids[i] = relid.ToString();
-                    i+=1;
+                    relationshipids.Add(relid.ToString());
                 }
             }
         }
@@ -219,7 +220,7 @@ namespace Console_SSL
         // Properties for the fields
         public string Category { get { return category; } }
         public string Content { get { return content; } }
-        public string [] RelationshipID { get { return relationshipids; } }
+        public List<string> RelationshipID { get { return relationshipids; } }
         public bool HasARelationship { get { return hasrelationship; } }
         public string Name
         {

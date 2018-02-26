@@ -190,53 +190,22 @@ namespace Console_SSL
             Console.WriteLine();
         }
 
-        public void CheckForRelationshipInAutoTextEntry()
+        public string CheckForRelationshipInAutoTextEntry()
         {
-            /*
-            var aElem = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
-                         where el.HasAttributes
-                         select el).ToList();
-
-            // What follows is a breakdown of the above LINQ expression
-            foreach (var elem in aElem)
+            var ElementsWithRelID = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+                                        where el.HasAttributes
+                                        select from attr in el.GetAttributes()
+                                            where attr.Value.Contains("rId")
+                                            select attr.Value;
+            foreach (var elems in ElementsWithRelID)
             {
-                Console.WriteLine("Element Name ==> {0}\tType ==> {1}\tValue ==> {2}", elem.LocalName, elem.GetType().Name,elem.InnerXml);
-            }
-
-            Console.ReadLine();
-
-            var aAttrb = (from elem in aElem
-                          select elem.GetAttributes()).ToList();
-
-            foreach (var attrs in aAttrb)
-            {
-                foreach (var attr in attrs)
+                foreach (var relid in elems)
                 {
-                    Console.WriteLine("Attribute Name ==> {0}\tValue ==> {1}", attr.XName, attr.Value);
-                }
-                
-            }
-
-            Console.ReadLine();
-            */
-
-            var RelID = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
-                          where el.HasAttributes
-                          select from attr in el.GetAttributes()
-                                  where attr.Value.Contains("rId")
-                                  select attr).ToList();
-
-            Console.WriteLine("RelID Count ==> {0}", RelID.Count());
-            foreach (var item in RelID)
-            {
-                if (item.Count()>0)
-                {
-                    Console.WriteLine("item Value ==> {0}", item.Single().Value);
+                    hasrelationship = true;
+                    return relid.ToString();
                 }
             }
-            Console.ReadLine();
-
-        
+            return string.Empty;
         }
 
         // Properties for the fields

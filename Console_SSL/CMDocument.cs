@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -119,7 +119,8 @@ namespace Console_SSL
                             ImagePart ImageSignatory = (ImagePart)AutoTextRelationshipPart;
                             if (ImageSignatory != null)
                             {
-                                mdp.CreateRelationshipToPart(ImageSignatory, "rId20"); //This hardcoded Relationship ID has to be changed.
+                                mdp.AddImagePart(ImageSignatory);
+                                mdp.CreateRelationshipToPart(ImageSignatory); //This hardcoded Relationship ID has to be changed.
                             }
                             break;
 

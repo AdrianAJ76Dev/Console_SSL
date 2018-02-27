@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -47,11 +47,9 @@ namespace Console_SSL
         {
             WordprocessingDocument newdoc = WordprocessingDocument.CreateFromTemplate(template);
             wrddoc = newdoc;
-            wrddoc.SaveAs(DOC_PATH_NAME);
             mdp = newdoc.MainDocumentPart;
             return mdp.Document;
         }
-
 
         private void ReplaceContentControlWithAutoTextInAContentControl()
         {
@@ -107,27 +105,6 @@ namespace Console_SSL
                     Console.ReadLine();
                 }
                 wrddoc.SaveAs(DOC_PATH_NAME);
-
-                // Form the relationships found in the AutoText in the Glossary Document
-                foreach (string relshpID in atxt.RelationshipID)
-                {
-                    OpenXmlPart AutoTextRelationshipPart = gdp.GetPartById(relshpID);
-                    switch (AutoTextRelationshipPart.GetType().Name)
-                    {
-                        // Figure out what to switch on.  It'll be on OpenXmlPart Type
-                        case "ImagePart":
-                            ImagePart ImageSignatory = (ImagePart)AutoTextRelationshipPart;
-                            if (ImageSignatory != null)
-                            {
-                                mdp.AddImagePart(ImageSignatory);
-                                mdp.CreateRelationshipToPart(ImageSignatory); //This hardcoded Relationship ID has to be changed.
-                            }
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
             }
         }
     }
@@ -216,10 +193,40 @@ namespace Console_SSL
                     relationshipids.Add(relid.ToString());
                 }
             }
+
+            // Form the relationships found in the AutoText in the Glossary Document
+            foreach (string relshpID in relationshipids)
+            {
+                string newRelID=string.Empty;
+                OpenXmlPart AutoTextRelationshipPart = gdp.GetPartById(relshpID);
+                switch (AutoTextRelationshipPart.GetType().Name)
+                {
+                    // Figure out what to switch on.  It'll be on OpenXmlPart Type
+                    case "ImagePart":
+                        ImagePart ImageSignatory = (ImagePart)AutoTextRelationshipPart;
+
+                        if (ImageSignatory != null)
+                        {
+                            //parentmdp.AddImagePart(ImagePartType.Png);
+                            newRelID=parentmdp.CreateRelationshipToPart(ImageSignatory); //This hardcoded Relationship ID has to be changed.
+                        }
+                        foreach (IdPartPair item in parentmdp.Parts)
+                        {
+                            Console.WriteLine("Relationship ID ==> {0}, OpenXmlPart ==> {1}", 
+                                item.RelationshipId, item.OpenXmlPart.ToString());
+                        }
+                        Console.ReadLine();
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
         }
 
-        // Properties for the fields
-        public string Category { get { return category; } }
+    // Properties for the fields
+    public string Category { get { return category; } }
         public string Content { get { return content; } }
         public List<string> RelationshipID { get { return relationshipids; } }
         public bool HasARelationship { get { return hasrelationship; } }

@@ -237,7 +237,8 @@ namespace Console_SSL
                 Console.WriteLine("RelationshipId ==> {0}",item.RelationshipId);
                 Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
                 Console.WriteLine();
-            } 
+            }
+            Console.WriteLine("ImagePart Count ==> {0}", gdp.GetPartsCountOfType<ImagePart>());
             Console.ReadLine();
         }
 
@@ -254,6 +255,7 @@ namespace Console_SSL
                 Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
                 Console.WriteLine();
             }
+            Console.WriteLine("ImagePart Count ==> {0}", parentmdp.GetPartsCountOfType<ImagePart>());
             Console.ReadLine();
         }
 

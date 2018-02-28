@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -96,19 +96,20 @@ namespace Console_SSL
                     Console.WriteLine("AutoText Name ==> {0}", atxt.Name);
 
                     // Create a new relationship in the NEW document with the AutoText FOUND in the template
-                    atxt.CheckForRelationshipInAutoTextEntry();
+                    //atxt.CheckForRelationshipInAutoTextEntry();
 
                     //atxt.IdentifyPartsAndRelationships();
                     //atxt.IdentifyPartsAndRelationshipsMDP();
                     //atxt.InvestigatingDocPart();
-                    ReplaceContentControlWithAutoTextInAContentControl();
-                    Console.ReadLine();
+                    //ReplaceContentControlWithAutoTextInAContentControl();
+                    //Console.ReadLine();
+                    atxt.PartRelPairGlossaryDoc();
+                    atxt.PartRelPairMainDoc();
                 }
                 wrddoc.SaveAs(DOC_PATH_NAME);
             }
         }
     }
-}
 
     class CBAutoText
     {
@@ -222,11 +223,42 @@ namespace Console_SSL
                         break;
                 }
             }
-
         }
 
-    // Properties for the fields
-    public string Category { get { return category; } }
+        public void PartRelPairGlossaryDoc()
+        {
+            Console.WriteLine("{0}", gdp.RootElement.GetType().Name);
+            Console.WriteLine("Relationship Count ==> {0}", gdp.Parts.Count());
+            Console.WriteLine();
+            foreach (IdPartPair item in gdp.Parts)
+            {
+                Console.WriteLine("Content Type ==> {0}",item.OpenXmlPart.ContentType);
+                Console.WriteLine("Uri ==> {0}", item.OpenXmlPart.Uri);
+                Console.WriteLine("RelationshipId ==> {0}",item.RelationshipId);
+                Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
+                Console.WriteLine();
+            } 
+            Console.ReadLine();
+        }
+
+        public void PartRelPairMainDoc()
+        {
+            Console.WriteLine("{0}", parentmdp.RootElement.GetType().Name);
+            Console.WriteLine("Relationship Count ==> {0}", parentmdp.Parts.Count());
+            Console.WriteLine();
+            foreach (IdPartPair item in parentmdp.Parts)
+            {
+                Console.WriteLine("Content Type ==> {0}", item.OpenXmlPart.ContentType);
+                Console.WriteLine("Uri ==> {0}", item.OpenXmlPart.Uri);
+                Console.WriteLine("RelationshipId ==> {0}", item.RelationshipId);
+                Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
+                Console.WriteLine();
+            }
+            Console.ReadLine();
+        }
+
+        // Properties for the fields
+        public string Category { get { return category; } }
         public string Content { get { return content; } }
         public List<string> RelationshipID { get { return relationshipids; } }
         public bool HasARelationship { get { return hasrelationship; } }
@@ -251,3 +283,4 @@ namespace Console_SSL
             }
         }
     }
+}

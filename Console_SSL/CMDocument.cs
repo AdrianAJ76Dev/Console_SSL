@@ -198,6 +198,13 @@ namespace Console_SSL
                                             select attr.Value).ToArray<IEnumerable<string>>();
             //PartRelPairGlossaryDoc();
 
+            // Retrieve relationship ID from the document/document.xml in the main document part
+            var MainDocRelIDs = from el in parentmdp.Document.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+                                where el.HasAttributes
+                                select from attr in el.GetAttributes()
+                                       where attr.Value.Contains("rId")
+                                       select attr.Value;
+
             if (AutoTextRelIDs != null)
             {
                 hasrelationship = true;
@@ -205,7 +212,7 @@ namespace Console_SSL
                 {
                     foreach (var relid in elems)
                     {
-                        RelIDAutoText = relid.ToString();
+                        RelIDAutoText = relid.ToString(); // May need to make this into an array, or maybe not
                         relationshipidsatxt.Add(relid.ToString());
                     }
                 }
@@ -226,7 +233,7 @@ namespace Console_SSL
                 {
                     foreach (var relid in elems)
                     {
-                        RelIDDocument = relid.ToString();
+                        RelIDDocument = relid.ToString(); // May need to make this into an array, or maybe not
                         relationshipidsdoc.Add(relid.ToString());
                     }
                 }

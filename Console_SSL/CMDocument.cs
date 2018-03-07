@@ -32,8 +32,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        //private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -191,18 +191,12 @@ namespace Console_SSL
             hasrelationship = false;
 
             // Retrieve relationship ID from the document/document.xml in glossary part
-            var AutoTextRelIDs = from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+            var AutoTextRelIDs = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
                                         where el.HasAttributes
                                         select from attr in el.GetAttributes()
                                             where attr.Value.Contains("rId")
-                                            select attr.Value;
-
-            // Retrieve relationship ID from the document/document.xml in the main document part
-            var MainDocRelIDs = from el in parentmdp.Document.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
-                                where el.HasAttributes
-                                select from attr in el.GetAttributes()
-                                       where attr.Value.Contains("rId")
-                                       select attr.Value;
+                                            select attr.Value).ToArray<IEnumerable<string>>();
+            //PartRelPairGlossaryDoc();
 
             if (AutoTextRelIDs != null)
             {
@@ -217,6 +211,14 @@ namespace Console_SSL
                 }
             }
 
+            // Retrieve relationship ID from the document/document.xml in the main document part
+            var MainDocRelIDs = from el in parentmdp.Document.GetFirstChild<Body>().Descendants<OpenXmlElement>()
+                                where el.HasAttributes
+                                select from attr in el.GetAttributes()
+                                       where attr.Value.Contains("rId")
+                                       select attr.Value;
+            //PartRelPairMainDoc();
+
             if (MainDocRelIDs != null)
             {
                 hasrelationship = true;
@@ -228,72 +230,51 @@ namespace Console_SSL
                         relationshipidsdoc.Add(relid.ToString());
                     }
                 }
-            }
+                // Establish new relationship
+                OpenXmlPart AutoTextPart = gdp.GetPartById(RelIDAutoText);
+                IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
+                                                where autotextrel.RelationshipId == RelIDAutoText
+                                                select autotextrel).SingleOrDefault();
 
-            // Form the relationships found in the AutoText in the Glossary Document
-            foreach (string relshpID in relationshipidsatxt)
-            {
-                string newRelID = string.Empty;
-                OpenXmlPart AutoTextRelationshipPart = gdp.GetPartById(relshpID);
-                switch (AutoTextRelationshipPart.GetType().Name)
-                {
-                    // Figure out what to switch on.  It'll be on OpenXmlPart Type
-                    case "ImagePart":
-                        ImagePart ImageSignatory = (ImagePart)AutoTextRelationshipPart;
-                        Console.WriteLine("{0}", ImageSignatory.Uri);
-                        Console.WriteLine("{0}",ImageSignatory.GetType().Name);
-                        Console.ReadLine();
-
-                        if (ImageSignatory != null)
-                        {
-                            //parentmdp.AddImagePart(ImagePartType.Png);
-                            newRelID = parentmdp.CreateRelationshipToPart(ImageSignatory); //This hardcoded Relationship ID has to be changed.
-                        }
-
-                        Console.ReadLine();
-                        break;
-
-                    default:
-                        break;
-                }
-
+                parentmdp.DeleteReferenceRelationship(RelIDDocument);
+                parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
             }
 
         }
 
-        //public void PartRelPairGlossaryDoc()
-        //{
-        //    Console.WriteLine("{0}", gdp.RootElement.GetType().Name);
-        //    Console.WriteLine("Relationship Count ==> {0}", gdp.Parts.Count());
-        //    Console.WriteLine();
-        //    foreach (IdPartPair item in gdp.Parts)
-        //    {
-        //        Console.WriteLine("Content Type ==> {0}",item.OpenXmlPart.ContentType);
-        //        Console.WriteLine("Uri ==> {0}", item.OpenXmlPart.Uri);
-        //        Console.WriteLine("RelationshipId ==> {0}",item.RelationshipId);
-        //        Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
-        //        Console.WriteLine();
-        //    }
-        //    Console.WriteLine("ImagePart Count ==> {0}", gdp.GetPartsCountOfType<ImagePart>());
-        //    Console.ReadLine();
-        //}
+        public void PartRelPairGlossaryDoc()
+        {
+            Console.WriteLine("{0}", gdp.RootElement.GetType().Name);
+            Console.WriteLine("Relationship Count ==> {0}", gdp.Parts.Count());
+            Console.WriteLine();
+            foreach (IdPartPair item in gdp.Parts)
+            {
+                Console.WriteLine("Content Type ==> {0}", item.OpenXmlPart.ContentType);
+                Console.WriteLine("Uri ==> {0}", item.OpenXmlPart.Uri);
+                Console.WriteLine("RelationshipId ==> {0}", item.RelationshipId);
+                Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
+                Console.WriteLine();
+            }
+            Console.WriteLine("ImagePart Count ==> {0}", gdp.GetPartsCountOfType<ImagePart>());
+            Console.ReadLine();
+        }
 
-        //public void PartRelPairMainDoc()
-        //{
-        //    Console.WriteLine("{0}", parentmdp.RootElement.GetType().Name);
-        //    Console.WriteLine("Relationship Count ==> {0}", parentmdp.Parts.Count());
-        //    Console.WriteLine();
-        //    foreach (IdPartPair item in parentmdp.Parts)
-        //    {
-        //        Console.WriteLine("Content Type ==> {0}", item.OpenXmlPart.ContentType);
-        //        Console.WriteLine("Uri ==> {0}", item.OpenXmlPart.Uri);
-        //        Console.WriteLine("RelationshipId ==> {0}", item.RelationshipId);
-        //        Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
-        //        Console.WriteLine();
-        //    }
-        //    Console.WriteLine("ImagePart Count ==> {0}", parentmdp.GetPartsCountOfType<ImagePart>());
-        //    Console.ReadLine();
-        //}
+        public void PartRelPairMainDoc()
+        {
+            Console.WriteLine("{0}", parentmdp.RootElement.GetType().Name);
+            Console.WriteLine("Relationship Count ==> {0}", parentmdp.Parts.Count());
+            Console.WriteLine();
+            foreach (IdPartPair item in parentmdp.Parts)
+            {
+                Console.WriteLine("Content Type ==> {0}", item.OpenXmlPart.ContentType);
+                Console.WriteLine("Uri ==> {0}", item.OpenXmlPart.Uri);
+                Console.WriteLine("RelationshipId ==> {0}", item.RelationshipId);
+                Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
+                Console.WriteLine();
+            }
+            Console.WriteLine("ImagePart Count ==> {0}", parentmdp.GetPartsCountOfType<ImagePart>());
+            Console.ReadLine();
+        }
 
         // Properties for the fields
         public string Category { get { return category; } }

@@ -25,7 +25,7 @@ namespace Console_SSL
         private WordprocessingDocument wrddoc;
         private MainDocumentPart sslmdp;
         private Document ssldoc;
-        private const string DOC_PATH_NAME = @"D:\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
 
         private GlossaryDocumentPart gdp;
         private GlossaryDocument gd;

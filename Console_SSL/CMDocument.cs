@@ -199,62 +199,21 @@ namespace Console_SSL
             if (AutoTextRelIDs[0].SingleOrDefault()!=null)
             {
                 hasrelationship = true;
-                foreach (var relid in AutoTextRelIDs)
+                foreach (var IDs in AutoTextRelIDs)
                 {
-                    Console.WriteLine("Relationship ID ==> {0}", relid);
-                    // Establish new relationship
-                    OpenXmlPart AutoTextPart = gdp.GetPartById(RelIDAutoText);
-                    IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
-                                                   where autotextrel.RelationshipId.Equals(relid)
-                                                   select autotextrel).SingleOrDefault();
-
-                    parentmdp.DeleteReferenceRelationship(RelIDDocument);
-                    parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
+                    foreach (var relid in IDs)
+                    {
+                        Console.WriteLine("Relationship ID ==> {0}", relid);
+                        // Establish new relationship
+                        OpenXmlPart AutoTextPart = gdp.GetPartById(relid);
+                        IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
+                                                       where autotextrel.RelationshipId.Equals(relid)
+                                                       select autotextrel).SingleOrDefault();
+                        parentmdp.DeleteReferenceRelationship(RelIDDocument);
+                        parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
+                    }
                 }
             }
-
-            //PartRelPairGlossaryDoc();
-
-            // Retrieve relationship ID from the document/document.xml in the main document part
-            //var MainDocRelIDs = (from el in parentmdp.Document.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
-            //                    where el.HasAttributes
-            //                    select from attr in el.GetAttributes()
-            //                           where attr.Value.Contains("rId")
-            //                           select attr.Value).ToArray<IEnumerable<string>>();
-
-            //if (AutoTextRelIDs != null)
-            //{
-            //    hasrelationship = true;
-            //    foreach (var elems in AutoTextRelIDs)
-            //    {
-            //        foreach (var relid in elems)
-            //        {
-            //            RelIDAutoText = relid.ToString(); // May need to make this into an array, or maybe not
-            //            relationshipidsatxt.Add(relid.ToString());
-            //        }
-            //    }
-            //}
-
-            // Retrieve relationship ID from the document/document.xml in the main document part
-            //var MainDocRelIDs = from el in parentmdp.Document.GetFirstChild<Body>().Descendants<OpenXmlElement>()
-            //                    where el.HasAttributes
-            //                    select from attr in el.GetAttributes()
-            //                           where attr.Value.Contains("rId")
-            //                           select attr.Value;
-            //PartRelPairMainDoc();
-
-            //if (MainDocRelIDs != null)
-            //{
-            //    hasrelationship = true;
-            //    foreach (var elems in MainDocRelIDs)
-            //    {
-            //        foreach (var relid in elems)
-            //        {
-            //            RelIDDocument = relid.ToString(); // May need to make this into an array, or maybe not
-            //            relationshipidsdoc.Add(relid.ToString());
-            //        }
-            //    }
-            //}
 
         }
 

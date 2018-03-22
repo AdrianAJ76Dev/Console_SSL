@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Xml;
+using System.Xml.Linq;
+
 // Open XML References
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -190,31 +193,50 @@ namespace Console_SSL
         {
             hasrelationship = false;
             // Retrieve relationship ID from the document/document.xml in glossary part
-            var AutoTextRelIDs = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
-                                  where el.HasAttributes
-                                  select from attr in el.GetAttributes()
-                                         where attr.Value.Contains("rId")
-                                         select attr.Value).ToArray();
+            XElement docAutoText = XElement.Parse(autotextDocPart.OuterXml);
+            IEnumerable<XAttribute> allattrbs = docAutoText.Descendants().Attributes();
+            var AutoTextRelIDs = (from attrb in allattrbs
+                                 where attrb.Value.Contains("rId")
+                                 select attrb.Value).SingleOrDefault();
 
-            if (AutoTextRelIDs[0].SingleOrDefault()!=null)
-            {
-                hasrelationship = true;
-                foreach (var IDs in AutoTextRelIDs)
-                {
-                    foreach (var relid in IDs)
-                    {
-                        Console.WriteLine("Relationship ID ==> {0}", relid);
-                        // Establish new relationship
-                        OpenXmlPart AutoTextPart = gdp.GetPartById(relid);
-                        IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
-                                                       where autotextrel.RelationshipId.Equals(relid)
-                                                       select autotextrel).SingleOrDefault();
-                        parentmdp.DeleteReferenceRelationship(RelIDDocument);
-                        parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
-                    }
-                }
-            }
+            Console.WriteLine("attrb ==> {0}", AutoTextRelIDs);
+            Console.ReadLine();
 
+
+            //var AutoTextRelIDs_OLD = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
+            //                      where el.HasAttributes
+            //                      select from attr in el.GetAttributes()
+            //                             where attr.Value.Contains("rId")
+            //                             select new
+            //                             {
+            //                                 rel_ID = attr.Value,
+            //                                 elem = el.LocalName
+            //                             }).ToArray();
+
+            //foreach (var item in AutoTextRelIDs)
+            //{
+            //    Console.WriteLine("{0}", item);
+            //}
+
+            //if (AutoTextRelIDs[0].SingleOrDefault()!=null)
+            //{
+            //    hasrelationship = true;
+            //    foreach (var IDs in AutoTextRelIDs)
+            //    {
+                    //foreach (var relid in IDs)
+                    //{
+                    //    Console.WriteLine("Relationship ID ==> {0}", relid);
+                    //    // Establish new relationship
+                    //    //OpenXmlPart AutoTextPart = gdp.GetPartById(relid);
+                    //    IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
+                    //                                   where autotextrel.RelationshipId.Equals(relid)
+                    //                                   select autotextrel).SingleOrDefault();
+
+                    //    parentmdp.DeleteReferenceRelationship(RelIDDocument);
+                    //    parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
+                    //}
+            //    }
+            //}
         }
 
         public void PartRelPairGlossaryDoc()

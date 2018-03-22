@@ -191,52 +191,62 @@ namespace Console_SSL
 
         public void SearchForRelationshipInAutoTextEntry()
         {
-            hasrelationship = false;
-            // Retrieve relationship ID from the document/document.xml in glossary part
+            // Retrieve RELATIONSHIP IDs from the document/document.xml in GLOSSARY PART/AUTOTEXT GALLERY
             XElement docAutoText = XElement.Parse(autotextDocPart.OuterXml);
-            IEnumerable<XAttribute> allattrbs = docAutoText.Descendants().Attributes();
-            var AutoTextRelIDs = (from attrb in allattrbs
+            IEnumerable<XAttribute> autotextPartAttribs = docAutoText.Descendants().Attributes();
+            var AutoTextRelIDs = from attrb in autotextPartAttribs
                                  where attrb.Value.Contains("rId")
-                                 select attrb.Value).SingleOrDefault();
+                                 select attrb.Value;
 
-            Console.WriteLine("attrb ==> {0}", AutoTextRelIDs);
+            if (AutoTextRelIDs.Count()==0)
+            {
+                Console.WriteLine("There are no relationship IDs in this Autotext/DocPart");
+                hasrelationship = false;
+            }
+            else
+            {
+                Console.WriteLine("Relationship IDs found in AutoTextRelIDs");
+                foreach (var relID in AutoTextRelIDs)
+                {
+                    Console.WriteLine("attrb ==> {0}", relID);
+                    Console.WriteLine("Type of Part in relationship ==> {0}", gdp.GetPartById(relID).GetType().Name);
+                }
+                hasrelationship = true;
+            }
             Console.ReadLine();
 
 
-            //var AutoTextRelIDs_OLD = (from el in autotextDocPart.GetFirstChild<DocPartBody>().Descendants<OpenXmlElement>()
-            //                      where el.HasAttributes
-            //                      select from attr in el.GetAttributes()
-            //                             where attr.Value.Contains("rId")
-            //                             select new
-            //                             {
-            //                                 rel_ID = attr.Value,
-            //                                 elem = el.LocalName
-            //                             }).ToArray();
+            // Retrieve RELATIONSHIP IDs from the document/document.xml in GLOSSARY PART/AUTOTEXT GALLERY
+            XElement docMain = XElement.Parse(parentmdp.Document.OuterXml);
+            IEnumerable<XAttribute> mainDocAttribs = docMain.Descendants().Attributes();
+            var MainDocRelIDs = from attrb in mainDocAttribs
+                                 where attrb.Value.Contains("rId")
+                                 select attrb.Value;
 
-            //foreach (var item in AutoTextRelIDs)
-            //{
-            //    Console.WriteLine("{0}", item);
-            //}
+            if (MainDocRelIDs.Count() == 0)
+            {
+                hasrelationship = false;
+                Console.WriteLine("There are no relationship IDs in this main document part");
+            }
+            else
+            {
+                Console.WriteLine("Relationship IDs found in MainDocRelIDs");
+                foreach (var relID in MainDocRelIDs)
+                {
+                    Console.WriteLine("attrb ==> {0}", relID);
+                    Console.WriteLine("Type of Part in relationship ==> {0}", gdp.GetPartById(relID).GetType().Name);
+                }
+                hasrelationship = true;
+            }
+            Console.ReadLine();
 
-            //if (AutoTextRelIDs[0].SingleOrDefault()!=null)
-            //{
-            //    hasrelationship = true;
-            //    foreach (var IDs in AutoTextRelIDs)
-            //    {
-                    //foreach (var relid in IDs)
-                    //{
-                    //    Console.WriteLine("Relationship ID ==> {0}", relid);
-                    //    // Establish new relationship
-                    //    //OpenXmlPart AutoTextPart = gdp.GetPartById(relid);
-                    //    IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
-                    //                                   where autotextrel.RelationshipId.Equals(relid)
-                    //                                   select autotextrel).SingleOrDefault();
+            // Establish new relationship
+            //    IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
+            //                                   where autotextrel.RelationshipId.Equals(relid)
+            //                                   select autotextrel).SingleOrDefault();
 
-                    //    parentmdp.DeleteReferenceRelationship(RelIDDocument);
-                    //    parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
-                    //}
-            //    }
-            //}
+            //    parentmdp.DeleteReferenceRelationship(RelIDDocument);
+            //    parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
         }
 
         public void PartRelPairGlossaryDoc()

@@ -119,7 +119,6 @@ namespace Console_SSL
 
         // 3-23-18
         // Standard XML element
-        private XElement xeAutoText = null;
 
         // 2-28-2018 Addition
         private string RelIDAutoText;
@@ -151,7 +150,7 @@ namespace Console_SSL
             // LINQ over an XElement is easier than LINQ over an OpenXmlElement
             var AutoTextRelIDs = from attrb in autotextPartAttribs
                                  where attrb.Value.Contains("rId")
-                                 select new { attrb.Value, attrb.Parent.Parent, attrb.Name};
+                                 select new { ID = attrb.Value, AutoTextName = autotextDocPart.GetFirstChild<DocPartProperties>().DocPartName.Val, AttributeName = attrb.Name};
 
             if (AutoTextRelIDs.Count()==0)
             {
@@ -163,8 +162,8 @@ namespace Console_SSL
                 Console.WriteLine("Relationship IDs found in AutoTextRelIDs");
                 foreach (var relID in AutoTextRelIDs)
                 {
-                    RelIDAutoText = relID.Value;
-                    Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID.Value).GetType().Name, gdp.GetPartById(relID.Value).Uri);
+                    RelIDAutoText = relID.ID;
+                    Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID.ID).GetType().Name, gdp.GetPartById(relID.ID).Uri);
                 }
                 hasrelationship = true;
             }
@@ -175,6 +174,8 @@ namespace Console_SSL
             XElement docMain = XElement.Parse(parentmdp.Document.OuterXml);
 
             // THIS brings back ALL attributes instead of attributes under a specific OpenXmlElement
+            // REVISION ONLY retrieve from the section being replaced NOT retrieve all relationships in the 
+            // ENTIRE document.
             IEnumerable<XAttribute> mainDocAttribs = docMain.Descendants().Attributes();
             var MainDocRelIDs = from attrb in mainDocAttribs
                                  where attrb.Value.Contains("rId")

@@ -104,6 +104,7 @@ namespace Console_SSL
                     atxt.SearchForRelationshipInAutoTextEntry();
                 }
                 wrddoc.SaveAs(DOC_PATH_NAME);
+                wrddoc.Close();
             }
         }
     }
@@ -152,8 +153,6 @@ namespace Console_SSL
                                  where attrb.Value.Contains("rId")
                                  select new { attrb.Value, attrb.Parent, attrb.Name};
 
-
-
             if (AutoTextRelIDs.Count()==0)
             {
                 Console.WriteLine("There are no relationship IDs in this Autotext/DocPart");
@@ -181,9 +180,8 @@ namespace Console_SSL
                                  where attrb.Value.Contains("rId")
                                  select attrb.Value;
 
-            if (MainDocRelIDs.Count() == 0)
+            if (hasrelationship==false)
             {
-                hasrelationship = false;
                 Console.WriteLine("There are no relationship IDs in this main document part");
             }
             else
@@ -192,6 +190,7 @@ namespace Console_SSL
                 foreach (var relID in MainDocRelIDs)
                 {
                     Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID).GetType().Name, gdp.GetPartById(relID).Uri);
+                    RelIDDocument = relID;
                     //Establish new relationship
                     IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
                                                        where autotextrel.RelationshipId.Equals(relID)

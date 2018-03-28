@@ -61,8 +61,9 @@ namespace Console_SSL
                     atx = new CBAutoText(atxname, gd.DocParts, ssldoc.Body);
                     atx.Insert();
                 }
+                wrddoc.SaveAs(DOC_PATH_NAME);
+                wrddoc.Close();
             }
-            wrddoc.SaveAs(DOC_PATH_NAME);
         }
 
         class CBAutoText

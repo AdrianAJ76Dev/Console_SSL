@@ -142,8 +142,6 @@ namespace Console_SSL
             relationshipidsdoc = new List<string>();
         }
 
-
-
         public void SearchForRelationshipInAutoTextEntry()
         {
             // Retrieve RELATIONSHIP IDs from the document/document.xml in GLOSSARY PART/AUTOTEXT GALLERY
@@ -152,7 +150,9 @@ namespace Console_SSL
             // LINQ over an XElement is easier than LINQ over an OpenXmlElement
             var AutoTextRelIDs = from attrb in autotextPartAttribs
                                  where attrb.Value.Contains("rId")
-                                 select attrb.Value;
+                                 select new { attrb.Value, attrb.Parent, attrb.Name};
+
+
 
             if (AutoTextRelIDs.Count()==0)
             {
@@ -164,8 +164,8 @@ namespace Console_SSL
                 Console.WriteLine("Relationship IDs found in AutoTextRelIDs");
                 foreach (var relID in AutoTextRelIDs)
                 {
-                    RelIDAutoText = relID;
-                    Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID).GetType().Name, gdp.GetPartById(relID).Uri);
+                    RelIDAutoText = relID.Value;
+                    Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID.Value).GetType().Name, gdp.GetPartById(relID.Value).Uri);
                 }
                 hasrelationship = true;
             }
@@ -192,18 +192,18 @@ namespace Console_SSL
                 foreach (var relID in MainDocRelIDs)
                 {
                     Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID).GetType().Name, gdp.GetPartById(relID).Uri);
+                    //Establish new relationship
+                    IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
+                                                       where autotextrel.RelationshipId.Equals(relID)
+                                                       select autotextrel).SingleOrDefault();
+
+                    parentmdp.DeleteReferenceRelationship(RelIDDocument);
+                    parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
                 }
                 hasrelationship = true;
             }
             Console.ReadLine();
 
-            // Establish new relationship
-            //    IdPartPair RelationshipPair = (from autotextrel in parentmdp.Parts
-            //                                   where autotextrel.RelationshipId.Equals(relid)
-            //                                   select autotextrel).SingleOrDefault();
-
-            //    parentmdp.DeleteReferenceRelationship(RelIDDocument);
-            //    parentmdp.CreateRelationshipToPart(RelationshipPair.OpenXmlPart, RelIDDocument);
         }
 
 
@@ -315,6 +315,6 @@ namespace Console_SSL
         public string Category { get { return category; } }
         public string Content { get { return content; } }
         public bool HasARelationship { get { return hasrelationship; } }
-        public List<string> RelationshipIDs { get { return RelIDAutoText; } }
+        //public List<string> RelationshipIDs { get { return RelIDAutoText; } }
     }
 }

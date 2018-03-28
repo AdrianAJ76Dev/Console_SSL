@@ -151,7 +151,7 @@ namespace Console_SSL
             // LINQ over an XElement is easier than LINQ over an OpenXmlElement
             var AutoTextRelIDs = from attrb in autotextPartAttribs
                                  where attrb.Value.Contains("rId")
-                                 select new { attrb.Value, attrb.Parent, attrb.Name};
+                                 select new { attrb.Value, attrb.Parent.Parent, attrb.Name};
 
             if (AutoTextRelIDs.Count()==0)
             {

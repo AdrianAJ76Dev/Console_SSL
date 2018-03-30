@@ -126,7 +126,11 @@ namespace Console_SSL
 
         // The description & content of AutoText
         private OpenXmlElement autotextDocPart;
-        
+
+        // 3-28-2018
+        private SdtElement cctrl;
+        private
+
         // Fields
         private string name = string.Empty;             // This is how I reference/call the AutoText
         private string category = string.Empty;         // This is the name of the content control the AutoText goes in
@@ -150,7 +154,13 @@ namespace Console_SSL
             // LINQ over an XElement is easier than LINQ over an OpenXmlElement
             var AutoTextRelIDs = from attrb in autotextPartAttribs
                                  where attrb.Value.Contains("rId")
-                                 select new { ID = attrb.Value, AutoTextName = autotextDocPart.GetFirstChild<DocPartProperties>().DocPartName.Val, AttributeName = attrb.Name};
+                                 select new {
+                                     ID = attrb.Value,
+                                     AttributeName = attrb.Name,
+                                     Category = this.Category,
+                                     HasARelationship = this.HasARelationship,
+                                     Name = this.Name
+                                 };
 
             if (AutoTextRelIDs.Count()==0)
             {
@@ -159,26 +169,30 @@ namespace Console_SSL
             }
             else
             {
+                hasrelationship = true;
                 Console.WriteLine("Relationship IDs found in AutoTextRelIDs");
                 foreach (var relID in AutoTextRelIDs)
                 {
                     RelIDAutoText = relID.ID;
                     Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID.ID).GetType().Name, gdp.GetPartById(relID.ID).Uri);
+                    cctrl = (from sdtCtrl in parentmdp.Document.Body.Descendants<SdtElement>()
+                                 where sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == relID.Category
+                                 || sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == relID.Name
+                                 select sdtCtrl).Single();
                 }
-                hasrelationship = true;
             }
             Console.ReadLine();
 
 
             // Retrieve RELATIONSHIP IDs from the document/document.xml in GLOSSARY PART/AUTOTEXT GALLERY
-            XElement docMain = XElement.Parse(parentmdp.Document.OuterXml);
+            XElement contentControl = XElement.Parse(cctrl.OuterXml);
 
             // THIS brings back ALL attributes instead of attributes under a specific OpenXmlElement
             // REVISION ONLY retrieve from the section being replaced NOT retrieve all relationships in the 
             // ENTIRE document.
-            IEnumerable<XAttribute> mainDocAttribs = docMain.Descendants().Attributes();
-            var MainDocRelIDs = from attrb in mainDocAttribs
-                                 where attrb.Value.Contains("rId")
+            IEnumerable<XAttribute> contentCtrlAttribs = contentControl.Attributes();
+            var ContentCtrlRelIDs = from attrb in contentCtrlAttribs
+                                where attrb.Value.Contains("rId")
                                  select attrb.Value;
 
             if (hasrelationship==false)
@@ -187,8 +201,8 @@ namespace Console_SSL
             }
             else
             {
-                Console.WriteLine("Relationship IDs found in MainDocRelIDs");
-                foreach (var relID in MainDocRelIDs)
+                Console.WriteLine("Relationship IDs found in ContentCtrlRelIDs");
+                foreach (var relID in ContentCtrlRelIDs)
                 {
                     Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID).GetType().Name, gdp.GetPartById(relID).Uri);
                     RelIDDocument = relID;

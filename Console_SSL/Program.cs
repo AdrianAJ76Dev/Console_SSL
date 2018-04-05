@@ -16,8 +16,8 @@ namespace Console_SSL
     {
         static void Main(string[] args)
         {
-            const string TEMPLATE_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\Sole Source Letter v4.dotx";
-            //const string TEMPLATE_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\Sole Source Letter v5.dotx";
+            //const string TEMPLATE_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\Sole Source Letter v4.dotx";
+            const string TEMPLATE_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\Sole Source Letter v5.dotx";
             /* Create new document from template */
             //SSLDocument sslnewdoc = new SSLDocument(TEMPLATE_PATH_NAME);
             CMDocument newdoc = new CMDocument(TEMPLATE_PATH_NAME);
@@ -48,7 +48,7 @@ namespace Console_SSL
             */
 
 
-            newdoc.BuildDocument(new string[] { "HED", "TP" });
+            newdoc.BuildDocument(new string[] { "K12", "TP" });
             Console.WriteLine("Finished");
             Console.ReadLine();
         }

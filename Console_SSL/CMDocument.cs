@@ -35,8 +35,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -112,6 +112,7 @@ namespace Console_SSL
                         foreach (var RelPart in atxt.RelationshipParts)
                         {
                             //Establish new relationship
+                            mdp.DeleteReferenceRelationship(ccRelIDs.FirstOrDefault().Value);
                             atxt.NewRelID = mdp.CreateRelationshipToPart(RelPart);
                             i++;
                         }

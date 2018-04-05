@@ -48,7 +48,7 @@ namespace Console_SSL
             */
 
 
-            newdoc.BuildDocument(new string[] { "HED", "JS" });
+            newdoc.BuildDocument(new string[] { "HED", "TP" });
             Console.WriteLine("Finished");
             Console.ReadLine();
         }

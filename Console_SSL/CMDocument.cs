@@ -133,7 +133,6 @@ namespace Console_SSL
     {
         // The AutoText "structures" in a document
         // The MS Word Document Parts or XML containers
-        private MainDocumentPart parentmdp;
         private GlossaryDocumentPart gdp;
         private DocParts dps;
 
@@ -161,8 +160,9 @@ namespace Console_SSL
         public void CheckForRelationship()
         {
             // Retrieve RELATIONSHIP IDs from the document/document.xml in GLOSSARY PART/AUTOTEXT GALLERY
-            XElement docAutoText = XElement.Parse(autotextDocPart.OuterXml);
-            IEnumerable<XAttribute> autotextPartAttribs = docAutoText.Descendants().Attributes();
+            XElement  AutoTextContent = XElement.Parse(this.content);
+            IEnumerable<XAttribute> autotextPartAttribs = AutoTextContent.Descendants().Attributes();
+
             // LINQ over an XElement is easier than LINQ over an OpenXmlElement
             var AutoTextRelIDs = from attrb in autotextPartAttribs
                                  where attrb.Value.Contains("rId")
@@ -176,19 +176,18 @@ namespace Console_SSL
             else
             {
                 hasrelationship = true;
-                Console.WriteLine("Relationship IDs found in AutoTextRelIDs");
                 foreach (var relID in AutoTextRelIDs)
                 {
-                    Console.WriteLine("attrb ==> {0}\t{1}\t{2}", relID, gdp.GetPartById(relID.Value).GetType().Name, gdp.GetPartById(relID.Value).Uri);
+                    /* Maybe, instead of adding relationship Parts I should raise an event
+                     * to ADD a NEW RELATIONSHIP passing the part to the parent document
+                     * AND returning the Relationship ID to the AutoText
+                     * AND the newly received Rel ID is INSERTED into the AutoText content.
+                    */
                     relationshipparts.Add(gdp.GetPartById(relID.Value));
                 }
             }
         }
 
-        public MainDocumentPart ParentMdp
-        {
-            set { parentmdp = value; }
-        }
 
         public GlossaryDocumentPart GDP
         {
@@ -197,69 +196,6 @@ namespace Console_SSL
                 gdp = value;
                 dps = gdp.GlossaryDocument.DocParts;
             }
-        }
-
-        public void IdentifyPartsAndRelationships()
-        {
-            Console.WriteLine("GlossaryDocument Parts Count ==> {0}", gdp.Parts.Count());
-            foreach (IdPartPair partrel in gdp.Parts)
-            {
-                Console.WriteLine("OpenXmlPart = {0}", partrel.OpenXmlPart);
-                Console.WriteLine("Relationship ID = {0}",partrel.RelationshipId);
-                Console.WriteLine();
-            }
-        }
-
-        public void IdentifyPartsAndRelationshipsMDP()
-        {
-            Console.WriteLine("MainDocumentPart Parts Count ==> {0}", parentmdp.Parts.Count());
-            foreach (IdPartPair partrel in parentmdp.Parts)
-            {
-                Console.WriteLine("OpenXmlPart = {0}", partrel.OpenXmlPart);
-                Console.WriteLine("Relationship ID = {0}", partrel.RelationshipId);
-                Console.WriteLine();
-            }
-        }
-
-        public void InvestigatingDocPart()
-        {
-            int DescendentsCount = autotextDocPart.GetFirstChild<DocPartBody>().Descendants().Count();
-            Console.WriteLine("Descendents Count ==> {0}",DescendentsCount);
-            Console.WriteLine();
-        }
-
-        public void PartRelPairGlossaryDoc()
-        {
-            Console.WriteLine("{0}", gdp.RootElement.GetType().Name);
-            Console.WriteLine("Relationship Count ==> {0}", gdp.Parts.Count());
-            Console.WriteLine();
-            foreach (IdPartPair item in gdp.Parts)
-            {
-                Console.WriteLine("Content Type ==> {0}", item.OpenXmlPart.ContentType);
-                Console.WriteLine("Uri ==> {0}", item.OpenXmlPart.Uri);
-                Console.WriteLine("RelationshipId ==> {0}", item.RelationshipId);
-                Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
-                Console.WriteLine();
-            }
-            Console.WriteLine("ImagePart Count ==> {0}", gdp.GetPartsCountOfType<ImagePart>());
-            Console.ReadLine();
-        }
-
-        public void PartRelPairMainDoc()
-        {
-            Console.WriteLine("{0}", parentmdp.RootElement.GetType().Name);
-            Console.WriteLine("Relationship Count ==> {0}", parentmdp.Parts.Count());
-            Console.WriteLine();
-            foreach (IdPartPair item in parentmdp.Parts)
-            {
-                Console.WriteLine("Content Type ==> {0}", item.OpenXmlPart.ContentType);
-                Console.WriteLine("Uri ==> {0}", item.OpenXmlPart.Uri);
-                Console.WriteLine("RelationshipId ==> {0}", item.RelationshipId);
-                Console.WriteLine("OpenXmlPart ==> {0}", item.OpenXmlPart.GetType().Name);
-                Console.WriteLine();
-            }
-            Console.WriteLine("ImagePart Count ==> {0}", parentmdp.GetPartsCountOfType<ImagePart>());
-            Console.ReadLine();
         }
 
         public string Name
@@ -271,21 +207,29 @@ namespace Console_SSL
 
             set
             {
+                OpenXmlElement autotextprops; // Using to navigate to the correct group of xml elements
+                OpenXmlElement autotextbody; // Using to navigate to the correct group of xml elements
+                OpenXmlElement autotextcc;
+
                 name = value;
                 var atxt = (from dp in dps
                            where dp.GetFirstChild<DocPartProperties>().DocPartName.Val == name
                            select dp).SingleOrDefault();
 
+                autotextprops = atxt.GetFirstChild<DocPartProperties>().FirstOrDefault();
+                autotextbody = atxt.GetFirstChild<DocPartBody>();
+                autotextcc = autotextbody.Descendants<SdtElement>().FirstOrDefault();
+
                 // Name of content control to insert retrieved autotext. Rename field to ContainControlName or something like that
-                category = atxt.GetFirstChild<DocPartProperties>().Category.Name.Val; 
-                
+                category = autotextprops.GetFirstChild<DocPartCategory>().Val;
+
                 // Containt to go into content control
-                content = atxt.GetFirstChild<DocPartBody>().Descendants<SdtElement>().FirstOrDefault().InnerXml;
+                content = autotextcc.InnerXml;
                 autotextDocPart = atxt;
             }
         }
 
-
+        
         // Properties for the fields
         public string Category { get { return category; } }
         public string Content { get { return content; } }

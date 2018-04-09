@@ -35,8 +35,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        //private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -80,7 +80,7 @@ namespace Console_SSL
                     Console.ReadLine();
 
                     var cctrl = (from sdtCtrl in doc.Body.Descendants<SdtElement>()
-                                    where sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == atxt.Category
+                                    where sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == atxt.CCName
                                     || sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == atxt.Name
                                     select sdtCtrl).SingleOrDefault();
 
@@ -102,6 +102,7 @@ namespace Console_SSL
                         foreach (var RelIDs in ccRelIDs)
                         {
                             Console.WriteLine("RelIDs = {0}", RelIDs.Value);
+                            mdp.DeleteReferenceRelationship(ccRelIDs.FirstOrDefault().Value);
                         }
                     }
 
@@ -112,7 +113,6 @@ namespace Console_SSL
                         foreach (var RelPart in atxt.RelationshipParts)
                         {
                             //Establish new relationship
-                            mdp.DeleteReferenceRelationship(ccRelIDs.FirstOrDefault().Value);
                             atxt.NewRelID = mdp.CreateRelationshipToPart(RelPart);
                             i++;
                         }
@@ -143,7 +143,7 @@ namespace Console_SSL
         private string name = string.Empty;             // This is how I reference/call the AutoText
         private string category = string.Empty;         // This is the name of the content control the AutoText goes in
         private string content = string.Empty;          // This is the contents of the AutoText: Content Control with text all retrieved as XML
-        private string containername = string.Empty;    // This IS the SAME as category. Category is where AutoText keeps the name of its content control
+        private string contentcontainername = string.Empty;    // This IS the SAME as category. Category is where AutoText keeps the name of its content control
         private bool hasrelationship = false;
         private List<string> relationshipids;
         private List<OpenXmlPart> relationshipparts;
@@ -207,31 +207,31 @@ namespace Console_SSL
 
             set
             {
-                OpenXmlElement autotextprops; // Using to navigate to the correct group of xml elements
-                OpenXmlElement autotextbody; // Using to navigate to the correct group of xml elements
-                OpenXmlElement autotextcc;
+                DocPartProperties autotextprops; // Using to navigate to the correct group of xml elements
+                DocPartBody autotextbody; // Using to navigate to the correct group of xml elements
+                SdtElement autotextcc;
 
                 name = value;
                 var atxt = (from dp in dps
                            where dp.GetFirstChild<DocPartProperties>().DocPartName.Val == name
                            select dp).SingleOrDefault();
 
-                autotextprops = atxt.GetFirstChild<DocPartProperties>().FirstOrDefault();
+                autotextprops = atxt.GetFirstChild<DocPartProperties>();
                 autotextbody = atxt.GetFirstChild<DocPartBody>();
-                autotextcc = autotextbody.Descendants<SdtElement>().FirstOrDefault();
+                autotextcc = autotextbody.Descendants<SdtElement>().SingleOrDefault();
 
                 // Name of content control to insert retrieved autotext. Rename field to ContainControlName or something like that
-                category = autotextprops.GetFirstChild<DocPartCategory>().Val;
+                contentcontainername = autotextprops.Category.Name.Val;
 
                 // Containt to go into content control
-                content = autotextcc.InnerXml;
+                content = autotextcc.OuterXml;
                 autotextDocPart = atxt;
             }
         }
 
         
         // Properties for the fields
-        public string Category { get { return category; } }
+        public string CCName { get { return contentcontainername; } }
         public string Content { get { return content; } }
         public bool HasARelationship { get { return hasrelationship; } }
         public string NewRelID { get { return newrelid; } set { newrelid = value; } }

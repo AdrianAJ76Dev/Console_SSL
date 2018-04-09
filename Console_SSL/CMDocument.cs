@@ -35,8 +35,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
-        private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
-        //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
+        //private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
+        private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
         private CBAutoText atxt;
 
@@ -223,7 +223,8 @@ namespace Console_SSL
                 // Name of content control to insert retrieved autotext. Rename field to ContainControlName or something like that
                 contentcontainername = autotextprops.Category.Name.Val;
 
-                // Containt to go into content control
+                // Content to go into content control.  
+                // 04/09/2018 Watch this because this is delicate and can invalidate the document.
                 content = autotextcc.OuterXml;
                 autotextDocPart = atxt;
             }

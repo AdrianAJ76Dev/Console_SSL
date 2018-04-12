@@ -118,7 +118,11 @@ namespace Console_SSL
                             newsignature = atxt.Content.Replace("rId7", atxt.NewRelID);
                         }
                     }
-                    cctrl.InnerXml = newsignature;
+                    if (newsignature.Length != 0)
+                        cctrl.InnerXml = newsignature;
+                    else
+                        cctrl.InnerXml = atxt.Content;
+
                 }
                 wrddoc.SaveAs(DOC_PATH_NAME);
                 wrddoc.Close();

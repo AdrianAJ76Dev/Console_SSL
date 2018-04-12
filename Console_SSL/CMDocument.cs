@@ -35,6 +35,8 @@ namespace Console_SSL
         private Document doc;
         private GlossaryDocumentPart gdp;
 
+        private string newsignature = string.Empty;
+
         private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
         //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
 
@@ -96,13 +98,11 @@ namespace Console_SSL
                     }
                     Console.WriteLine();
 
-
                     if (ccRelIDs.Count() > 0)
                     {
                         foreach (var RelIDs in ccRelIDs)
                         {
                             Console.WriteLine("RelIDs = {0}", RelIDs.Value);
-                            mdp.DeleteReferenceRelationship(ccRelIDs.FirstOrDefault().Value);
                         }
                     }
 
@@ -115,17 +115,15 @@ namespace Console_SSL
                             //Establish new relationship
                             atxt.NewRelID = mdp.CreateRelationshipToPart(RelPart);
                             i++;
+                            newsignature = atxt.Content.Replace("rId7", atxt.NewRelID);
                         }
                     }
-                    cctrl.InnerXml = atxt.Content;
+                    cctrl.InnerXml = newsignature;
                 }
                 wrddoc.SaveAs(DOC_PATH_NAME);
                 wrddoc.Close();
-
             }
         }
-
-
 
     }
 
@@ -144,6 +142,7 @@ namespace Console_SSL
         private string category = string.Empty;         // This is the name of the content control the AutoText goes in
         private string content = string.Empty;          // This is the contents of the AutoText: Content Control with text all retrieved as XML
         private string contentcontainername = string.Empty;    // This IS the SAME as category. Category is where AutoText keeps the name of its content control
+        private string cccontent = string.Empty;        // This is the content controls's Content Element
         private bool hasrelationship = false;
         private List<string> relationshipids;
         private List<OpenXmlPart> relationshipparts;
@@ -160,7 +159,8 @@ namespace Console_SSL
         public void CheckForRelationship()
         {
             // Retrieve RELATIONSHIP IDs from the document/document.xml in GLOSSARY PART/AUTOTEXT GALLERY
-            XElement  AutoTextContent = XElement.Parse(this.content);
+            // Fix Here? Content consist of the Content Control Property element AND the Content Control Content element
+            XElement  AutoTextContent = XElement.Parse(this.cccontent);
             IEnumerable<XAttribute> autotextPartAttribs = AutoTextContent.Descendants().Attributes();
 
             // LINQ over an XElement is easier than LINQ over an OpenXmlElement
@@ -222,9 +222,10 @@ namespace Console_SSL
 
                 // Name of content control to insert retrieved autotext. Rename field to ContainControlName or something like that
                 contentcontainername = autotextprops.Category.Name.Val;
+                cccontent = autotextcc.LastChild.OuterXml;
 
                 // Containt to go into content control
-                content = autotextcc.OuterXml;
+                content = autotextcc.InnerXml;
                 autotextDocPart = atxt;
             }
         }
@@ -236,5 +237,6 @@ namespace Console_SSL
         public bool HasARelationship { get { return hasrelationship; } }
         public string NewRelID { get { return newrelid; } set { newrelid = value; } }
         public List<OpenXmlPart> RelationshipParts { get {return relationshipparts; } }
+
     }
 }

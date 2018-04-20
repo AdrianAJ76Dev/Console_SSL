@@ -14,7 +14,6 @@ namespace Console_SSL
 {
     class Program
     {
-        private Dictionary<string,string> menuselections;
         static void Main(string[] args)
         {
             const string TEMPLATE_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\Sole Source Letter v5.dotx";

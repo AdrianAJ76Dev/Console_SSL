@@ -14,9 +14,10 @@ namespace Console_SSL
 {
     class Program
     {
+        private Dictionary<string,string> menuselections;
         static void Main(string[] args)
         {
-            const string TEMPLATE_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\Sole Source Letter v4.dotx";
+            const string TEMPLATE_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\Sole Source Letter v5.dotx";
             //const string TEMPLATE_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\Sole Source Letter v5.dotx";
             /* Create new document from template */
             //SSLDocument sslnewdoc = new SSLDocument(TEMPLATE_PATH_NAME);
@@ -47,8 +48,7 @@ namespace Console_SSL
              * ***************************
             */
 
-
-            newdoc.BuildDocument(new string[] { "K12", "TP" });
+            newdoc.BuildDocument(new string[] { "HED", "DMJ" });
             Console.WriteLine("Finished");
             Console.ReadLine();
         }

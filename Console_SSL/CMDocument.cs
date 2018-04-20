@@ -36,6 +36,7 @@ namespace Console_SSL
         private GlossaryDocumentPart gdp;
 
         private string newsignature = string.Empty;
+        private string oldid;
 
         private const string DOC_PATH_NAME = @"C:\Users\Adria\Documents\Dev Projects\SSL\Documents\SSL_Doc.docx";
         //private const string DOC_PATH_NAME = @"C:\Users\ajones\Documents\Automation\Code\Word\SSL Work\SSL_Doc.docx";
@@ -86,23 +87,32 @@ namespace Console_SSL
                                     || sdtCtrl.SdtProperties.GetFirstChild<SdtAlias>().Val == atxt.Name
                                     select sdtCtrl).SingleOrDefault();
 
-                    XElement cc = XElement.Parse(cctrl.OuterXml);
+                    XElement cc = XElement.Parse(atxt.CCContent);
                     IEnumerable<XAttribute> ccAttrs = cc.Descendants().Attributes();
-                    var ccRelIDs = from attrib in ccAttrs
+                    var ccRelIDs = (from attrib in ccAttrs
                                    where attrib.Value.Contains("rId")
-                                   select attrib;
+                                   select attrib).ToArray();
 
+                    Console.WriteLine("List of IdPartPairs {0}", mdp.Parts.Count());
                     foreach (var item in mdp.Parts)
                     {
                         Console.WriteLine("RelIDs ==> {0}", item.RelationshipId);
                     }
+
+                    Console.WriteLine("Found rIds {0}", ccRelIDs.Count());
+                    foreach (var item in ccRelIDs)
+                    {
+                        Console.WriteLine("RelIDs ==> {0}", item);
+                    }
+
                     Console.WriteLine();
 
                     if (ccRelIDs.Count() > 0)
                     {
                         foreach (var RelIDs in ccRelIDs)
                         {
-                            Console.WriteLine("RelIDs = {0}", RelIDs.Value);
+                            oldid = RelIDs.Value;
+                            Console.WriteLine("RelIDs = {0} and oldid = {1}", RelIDs.Value, oldid);
                         }
                     }
 
@@ -114,8 +124,8 @@ namespace Console_SSL
                         {
                             //Establish new relationship
                             atxt.NewRelID = mdp.CreateRelationshipToPart(RelPart);
+                            newsignature = atxt.Content.Replace(oldid, atxt.NewRelID);
                             i++;
-                            newsignature = atxt.Content.Replace("rId7", atxt.NewRelID);
                         }
                     }
                     if (newsignature.Length != 0)
@@ -238,6 +248,7 @@ namespace Console_SSL
         // Properties for the fields
         public string CCName { get { return contentcontainername; } }
         public string Content { get { return content; } }
+        public string CCContent { get { return cccontent; } }
         public bool HasARelationship { get { return hasrelationship; } }
         public string NewRelID { get { return newrelid; } set { newrelid = value; } }
         public List<OpenXmlPart> RelationshipParts { get {return relationshipparts; } }
